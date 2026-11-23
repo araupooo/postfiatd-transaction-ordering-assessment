@@ -45,11 +45,11 @@ Only deterministic source parsing and simulation runs. No live node, no submitte
 
 ## CI run
 
-CI run URL: TO-FILL (fill in the real workflow run URL after upload).
+CI run URL: https://github.com/araupooo/postfiatd-transaction-ordering-assessment/actions/runs/45241107006 (verify workflow on final HEAD 7c0332c5d9fc329e2249e22b1f234580880da5e8, job "verify" success, all 9 steps success).
 
 ## Fresh-clone reproduction log
 
-Fresh-clone repro log SHA-256: TO-FILL (fill in the real SHA-256 of `outputs/fresh-clone-run.log` after the clean reproduction).
+Fresh-clone repro log SHA-256: 3d10f77dc9ed375c8c2b767175c05de891388b4d34920320047cf65f687e5574 (`outputs/fresh-clone-run.log`, 10 lines; byte-identical to `outputs/run.log`).
 
 ## File map
 
