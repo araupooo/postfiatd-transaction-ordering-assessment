@@ -1,0 +1,66 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check out pinned postfiatd
+        run: |
+          PINNED="0085a1ff885d6a446369cf73a4430f75af22be55"
+          DEST="$HOME/workspace/postfiatd-pin-0085a1f"
+          mkdir -p "$HOME/workspace"
+          git init "$DEST"
+          git -C "$DEST" remote add origin https://github.com/postfiatorg/postfiatd.git
+          git -C "$DEST" fetch --depth 1 origin "$PINNED"
+          git -C "$DEST" checkout FETCH_HEAD
+          git -C "$DEST" rev-parse HEAD
+
+      - name: Verify shipped digests
+        run: bash scripts/verify_digests.sh
+
+      - name: Show simulator interface
+        run: python3 src/ordering_model.py --help
+
+      - name: Run full suite
+        run: bash scripts/run_all.sh
+
+      - name: Check run summary
+        run: |
+          python3 - <<'EOF'
+          import json
+          s = json.load(open("outputs/derived/run-summary.json"))
+          assert s["pinned_commit"] == "0085a1ff885d6a446369cf73a4430f75af22be55", s
+          assert s["scenario_count"] == 8, s
+          assert s["rule_count"] == 38, s
+          assert s["steps"]["ordering_model_config"] == "pass", s["steps"]
+          assert s["steps"]["simulator"] == "pass", s["steps"]
+          assert s["steps"]["probe"] == "pass", s["steps"]
+          for k, v in s["steps"].items():
+              assert v == "pass" or v.startswith("skipped"), (k, v)
+          m = json.load(open("run-manifest.json"))
+          assert m["counts"]["scenarios"]["total"] == 8, m
+          assert m["counts"]["rules"]["total"] == 38, m
+          assert m["counts"]["findings"]["total"] == 12, m
+          assert m["counts"]["claims"]["total"] == 24, m
+          assert m["counts"]["risks"]["total"] == 14, m
+          assert m["counts"]["gaps"] == 8, m
+          assert m["verification"]["excerpts"] == 61, m
+          assert m["verification"]["source_files"] == 25, m
+          assert m["probes"]["passed"] == m["probes"]["total"] == 12, m
+          print("run-summary OK:", s["steps"])
+          EOF
+
+      - name: Verify regenerated digests
+        run: bash scripts/verify_digests.sh
