@@ -1,0 +1,29 @@
+# Source excerpt E47 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/consensus/RCLConsensus.cpp, lines 515-535.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 72716393a820832d7fd6f6084f4ac9534fdc7ccf09c10f5aa8d2f129828a0cee
+# Source file git blob SHA: 457555cc1c83cb617a6838e0099fc93e1d715b49
+# Source file size: 37567 bytes
+
+# --- src/xrpld/app/consensus/RCLConsensus.cpp lines 515-535 ---
+    //--------------------------------------------------------------------------
+    std::set<TxID> failed;
+
+    // We want to put transactions in an unpredictable but deterministic order:
+    // we use the hash of the set.
+    //
+    // FIXME: Use a std::vector and a custom sorter instead of CanonicalTXSet?
+    CanonicalTXSet retriableTxs{result.txns.map_->getHash().as_uint256()};
+
+    JLOG(j_.debug()) << "Building canonical tx set: " << retriableTxs.key();
+
+    for (auto const& item : *result.txns.map_)
+    {
+        try
+        {
+            retriableTxs.insert(
+                std::make_shared<STTx const>(SerialIter{item.slice()}));
+            JLOG(j_.debug()) << "    Tx: " << item.key();
+        }
+        catch (std::exception const& ex)
+        {

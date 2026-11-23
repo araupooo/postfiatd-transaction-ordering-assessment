@@ -1,0 +1,24 @@
+# Source excerpt E54 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/FeeEscalation.md, lines 120-135.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 45c99ed0aefc44d09372441495e821fa14bf343ea157e807e9b9bad3be88e071
+# Source file git blob SHA: 468ab2b52822b7c4bb552908c4a0eea4897f1695
+# Source file size: 19544 bytes
+
+# --- src/xrpld/app/misc/FeeEscalation.md lines 120-135 ---
+   but in practice, either
+
+- it will eventually get applied to the ledger,
+- it will attempt to apply to the ledger and fail,
+- it will attempt to apply to the ledger and retry [10
+  times](#other-constants),
+- its last ledger sequence number will expire,
+- the user will replace it by submitting another transaction with the same
+  sequence number and at least a [25% higher fee](#other-constants), or
+- it will get dropped when the queue fills up with more valuable transactions.
+  The size limit is computed dynamically, and can hold transactions for
+  the next [20 ledgers](#other-constants) (restricted to a minimum of
+  [2000 transactions](#other-constants)). The lower the transaction's
+  fee, the more likely that it will get dropped if the network is busy.
+
+If a transaction is submitted for an account with one or more transactions

@@ -1,0 +1,54 @@
+# Source excerpt E49 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/ledger/detail/BuildLedger.cpp, lines 100-145.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 7cbf7941d742b2856a68352b064b89e78d6754c790b9374208a67517294c9cb1
+# Source file git blob SHA: 4305426753b4702525d665ed766ea7d627633313
+# Source file size: 8343 bytes
+
+# --- src/xrpld/app/ledger/detail/BuildLedger.cpp lines 100-145 ---
+    Application& app,
+    std::shared_ptr<Ledger const> const& built,
+    CanonicalTXSet& txns,
+    std::set<TxID>& failed,
+    OpenView& view,
+    beast::Journal j)
+{
+    bool certainRetry = true;
+    std::size_t count = 0;
+
+    // Attempt to apply all of the retriable transactions
+    for (int pass = 0; pass < LEDGER_TOTAL_PASSES; ++pass)
+    {
+        JLOG(j.debug()) << (certainRetry ? "Pass: " : "Final pass: ") << pass
+                        << " begins (" << txns.size() << " transactions)";
+        int changes = 0;
+
+        auto it = txns.begin();
+
+        while (it != txns.end())
+        {
+            auto const txid = it->first.getTXID();
+
+            try
+            {
+                if (pass == 0 && built->txExists(txid))
+                {
+                    it = txns.erase(it);
+                    continue;
+                }
+
+                switch (applyTransaction(
+                    app, view, *it->second, certainRetry, tapNONE, j))
+                {
+                    case ApplyTransactionResult::Success:
+                        it = txns.erase(it);
+                        ++changes;
+                        break;
+
+                    case ApplyTransactionResult::Fail:
+                        failed.insert(txid);
+                        it = txns.erase(it);
+                        break;
+
+                    case ApplyTransactionResult::Retry:
+                        ++it;

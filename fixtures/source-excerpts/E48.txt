@@ -1,0 +1,44 @@
+# Source excerpt E48 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/consensus/RCLConsensus.cpp, lines 625-660.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 72716393a820832d7fd6f6084f4ac9534fdc7ccf09c10f5aa8d2f129828a0cee
+# Source file git blob SHA: 457555cc1c83cb617a6838e0099fc93e1d715b49
+# Source file size: 37567 bytes
+
+# --- src/xrpld/app/consensus/RCLConsensus.cpp lines 625-660 ---
+        // in the previous consensus round.
+        //
+        bool anyDisputes = false;
+        for (auto const& [_, dispute] : result.disputes)
+        {
+            (void)_;
+            if (!dispute.getOurVote())
+            {
+                // we voted NO
+                try
+                {
+                    JLOG(j_.debug())
+                        << "Test applying disputed transaction that did"
+                        << " not get in " << dispute.tx().id();
+
+                    SerialIter sit(dispute.tx().tx_->slice());
+                    auto txn = std::make_shared<STTx const>(sit);
+
+                    // Disputed pseudo-transactions that were not accepted
+                    // can't be successfully applied in the next ledger
+                    if (isPseudoTx(*txn))
+                        continue;
+
+                    retriableTxs.insert(txn);
+
+                    anyDisputes = true;
+                }
+                catch (std::exception const& ex)
+                {
+                    JLOG(j_.debug()) << "Failed to apply transaction we voted "
+                                        "NO on. Exception: "
+                                     << ex.what();
+                }
+            }
+        }
+

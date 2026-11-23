@@ -1,0 +1,19 @@
+# Source excerpt E52 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/LoadFeeTrack.h, lines 140-150.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 5fb3503250f2b50824b08da514a01a127b883afb71ab2fbc9b110602ca6fb2cf
+# Source file git blob SHA: 0064359c762cf41f39b19d7840ad79809dd33369
+# Source file size: 4707 bytes
+
+# --- src/xrpld/app/misc/LoadFeeTrack.h lines 140-150 ---
+private:
+    static std::uint32_t constexpr lftNormalFee =
+        256;  // 256 is the minimum/normal load factor
+    static std::uint32_t constexpr lftFeeIncFraction =
+        4;  // increase fee by 1/4
+    static std::uint32_t constexpr lftFeeDecFraction =
+        4;  // decrease fee by 1/4
+    static std::uint32_t constexpr lftFeeMax = lftNormalFee * 1000000;
+
+    beast::Journal const j_;
+    std::mutex mutable lock_;

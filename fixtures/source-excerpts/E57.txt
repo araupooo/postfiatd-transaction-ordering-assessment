@@ -1,0 +1,27 @@
+# Source excerpt E57 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/AmendmentTable.cpp, lines 360-378.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 17442288c19bbf1cf0da1a85e596e3add6218757ec91a22f353cd03e2edbaf33
+# Source file git blob SHA: b13e40c3aed1ec8dbd9ec68a464caa5f512f113f
+# Source file size: 34890 bytes
+
+# --- src/xrpld/app/misc/detail/AmendmentTable.cpp lines 360-378 ---
+    passes(uint256 const& amendment) const
+    {
+        auto const& it = votes_.find(amendment);
+
+        if (it == votes_.end())
+            return false;
+
+        // Before this fix, it was possible for an amendment to activate with a
+        // percentage slightly less than 80% because we compared for "greater
+        // than or equal to" instead of strictly "greater than".
+        // One validator is an exception, otherwise it is not possible
+        // to gain majority.
+        if (!rules_.enabled(fixAmendmentMajorityCalc) ||
+            trustedValidations_ == 1)
+            return it->second >= threshold_;
+
+        return it->second > threshold_;
+    }
+

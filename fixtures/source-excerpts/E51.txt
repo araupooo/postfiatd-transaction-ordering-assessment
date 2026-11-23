@@ -1,0 +1,19 @@
+# Source excerpt E51 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/ledger/LocalTxs.h, lines 35-45.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 78c580574ff9abceb6bbc4c75dd4a97dd752346cf2241ce3b64996db85c62bb6
+# Source file git blob SHA: 2d202a5b6027eae9d580909129dea9c6e6770812
+# Source file size: 2181 bytes
+
+# --- src/xrpld/app/ledger/LocalTxs.h lines 35-45 ---
+class LocalTxs
+{
+public:
+    // The number of ledgers to hold a transaction is essentially
+    // arbitrary. It should be sufficient to allow the transaction to
+    // get into a fully-validated ledger.
+    static constexpr int holdLedgers = 5;
+
+    virtual ~LocalTxs() = default;
+
+    // Add a new local transaction

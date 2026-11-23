@@ -1,0 +1,13 @@
+# Source excerpt E56 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: include/xrpl/protocol/detail/features.macro, lines 148-152.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: c564926fa081d8ef09f65976f66f8e712cecf58ee1c68e0abf58345eea00e772
+# Source file git blob SHA: a88ebd1a492b9b5d658bde9c5f2835094536b244
+# Source file size: 10479 bytes
+
+# --- include/xrpl/protocol/detail/features.macro lines 148-152 ---
+XRPL_RETIRE(MultiSign)
+XRPL_RETIRE(TrustSetAuth)
+XRPL_RETIRE(FeeEscalation)
+XRPL_RETIRE(PayChan)
+XRPL_RETIRE(CryptoConditions)

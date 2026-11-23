@@ -1,0 +1,15 @@
+# Source excerpt E55 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: include/xrpl/protocol/detail/features.macro, lines 100-106.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: c564926fa081d8ef09f65976f66f8e712cecf58ee1c68e0abf58345eea00e772
+# Source file git blob SHA: a88ebd1a492b9b5d658bde9c5f2835094536b244
+# Source file size: 10479 bytes
+
+# --- include/xrpl/protocol/detail/features.macro lines 100-106 ---
+XRPL_FIX    (STAmountCanonicalize,       Supported::yes, VoteBehavior::DefaultYes)
+XRPL_FEATURE(FlowSortStrands,            Supported::yes, VoteBehavior::DefaultYes)
+XRPL_FEATURE(TicketBatch,                Supported::yes, VoteBehavior::DefaultYes)
+XRPL_FEATURE(NegativeUNL,                Supported::yes, VoteBehavior::DefaultYes)
+XRPL_FIX    (AmendmentMajorityCalc,      Supported::yes, VoteBehavior::DefaultYes)
+XRPL_FEATURE(HardenedValidations,        Supported::yes, VoteBehavior::DefaultYes)
+// fix1781: XRPEndpointSteps should be included in the circular payment check

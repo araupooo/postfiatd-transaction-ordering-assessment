@@ -1,0 +1,24 @@
+# Source excerpt E50 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/ledger/detail/LocalTxs.cpp, lines 55-70.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 673d32f7d98c7e5bd2d17902b7913bee7d23f551ece63921c94e30cbb9a5066e
+# Source file git blob SHA: 140bd32961acefec5a851bd9f0a2cfdab5c5a4f1
+# Source file size: 5809 bytes
+
+# --- src/xrpld/app/ledger/detail/LocalTxs.cpp lines 55-70 ---
+public:
+    LocalTx(LedgerIndex index, std::shared_ptr<STTx const> const& txn)
+        : m_txn(txn)
+        , m_expire(index + LocalTxs::holdLedgers)
+        , m_id(txn->getTransactionID())
+        , m_account(txn->getAccountID(sfAccount))
+        , m_seqProxy(txn->getSeqProxy())
+    {
+        if (txn->isFieldPresent(sfLastLedgerSequence))
+            m_expire =
+                std::min(m_expire, txn->getFieldU32(sfLastLedgerSequence) + 1);
+    }
+
+    uint256 const&
+    getID() const
+    {

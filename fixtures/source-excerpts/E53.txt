@@ -1,0 +1,29 @@
+# Source excerpt E53 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/FeeEscalation.md, lines 50-70.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 45c99ed0aefc44d09372441495e821fa14bf343ea157e807e9b9bad3be88e071
+# Source file git blob SHA: 468ab2b52822b7c4bb552908c4a0eea4897f1695
+# Source file size: 19544 bytes
+
+# --- src/xrpld/app/misc/FeeEscalation.md lines 50-70 ---
+   by the limit, the required fee level jumps drastically.
+
+- The formula is `( lastLedgerMedianFeeLevel *
+TransactionsInOpenLedger^2 / limit^2 )`,
+  and returns a [fee level](#fee-level).
+
+4. That may still be pretty small, but as more transactions get
+   into the ledger, the fee level increases exponentially.
+
+- For example, if the limit is 6, and the median fee is minimal,
+  and assuming all [reference transactions](#reference-transaction),
+  the 8th transaction only requires a [level](#fee-level) of about 174,000
+  or about 6800 drops,
+  but the 20th transaction requires a [level](#fee-level) of about
+  1,283,000 or about 50,000 drops.
+
+5. Finally, as each ledger closes, the median fee level of that ledger is
+   computed and used as `lastLedgerMedianFeeLevel` (with a
+   [minimum value of 128,000](#other-constants))
+   in the fee escalation formula for the next open ledger.
+
