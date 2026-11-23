@@ -1,0 +1,40 @@
+# Source excerpt E58 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/consensus/RCLCensorshipDetector.h, lines 99-130.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 90178de6bf89fa6678d3fbd23a2b6811f59d875e91f78ddc20fbbf800ad7297c
+# Source file git blob SHA: 7cdf15949d400b8e0cff8078c2f884f9b0b39ed2
+# Source file size: 4711 bytes
+
+# --- src/xrpld/app/consensus/RCLCensorshipDetector.h lines 99-130 ---
+    /** Determine which transactions made it and perform censorship detection.
+
+        This function is called when the server is proposing and a consensus
+        round it participated in completed.
+
+        @param accepted The set of transactions that the network agreed
+                        should be included in the ledger being built.
+        @param pred     A predicate invoked for every transaction we've proposed
+                        but which hasn't yet made it. The predicate must be
+                        callable as:
+                            bool pred(TxID const&, Sequence)
+                        It must return true for entries that should be removed.
+    */
+    template <class Predicate>
+    void
+    check(std::vector<TxID> accepted, Predicate&& pred)
+    {
+        auto acceptTxid = accepted.begin();
+        auto const ae = accepted.end();
+        std::sort(acceptTxid, ae);
+
+        // We want to remove all tracking entries for transactions that were
+        // accepted as well as those which match the predicate.
+
+        auto i = remove_if_intersect_or_match(
+            tracker_.begin(),
+            tracker_.end(),
+            accepted.begin(),
+            accepted.end(),
+            [&pred](auto const& x) { return pred(x.txid, x.seq); },
+            std::less<void>{});
+        tracker_.erase(i, tracker_.end());

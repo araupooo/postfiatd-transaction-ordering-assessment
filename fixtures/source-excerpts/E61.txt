@@ -1,0 +1,11 @@
+# Source excerpt E61 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/consensus/RCLConsensus.h, lines 54-56.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 93974ff62a79114b9ca9ea54bd359c6b0350e4b0a2f0ef0608337d7132764fdf
+# Source file git blob SHA: 38481d236335b558a0c6f07a534f52e3a76248ec
+# Source file size: 18461 bytes
+
+# --- src/xrpld/app/consensus/RCLConsensus.h lines 54-56 ---
+    /** Warn for transactions that haven't been included every so many ledgers.
+     */
+    constexpr static unsigned int censorshipWarnInternal = 15;

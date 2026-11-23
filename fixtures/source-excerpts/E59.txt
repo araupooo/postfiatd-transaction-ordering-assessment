@@ -1,0 +1,24 @@
+# Source excerpt E59 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/HashRouter.h, lines 260-275.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: dc6c51365ea65c2fd3196d5614772d8710da21d5920d4d273a8670d334d711d8
+# Source file git blob SHA: 60a0b01155707fde4cb3dd6696226117358d065f
+# Source file size: 8341 bytes
+
+# --- src/xrpld/app/misc/HashRouter.h lines 260-275 ---
+            return a seated optional again until the relay time has expired.
+            The internal set of peers will also be reset.
+
+        @return A `std::optional` set of peers which do not need to be
+            relayed to. If the result is unseated, the item should
+            _not_ be relayed.
+    */
+    std::optional<std::set<PeerShortID>>
+    shouldRelay(uint256 const& key);
+
+private:
+    // pair.second indicates whether the entry was created
+    std::pair<Entry&, bool>
+    emplace(uint256 const&);
+
+    std::mutex mutable mutex_;

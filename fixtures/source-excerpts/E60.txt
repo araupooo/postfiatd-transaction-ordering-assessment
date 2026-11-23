@@ -1,0 +1,44 @@
+# Source excerpt E60 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/consensus/RCLConsensus.cpp, lines 770-805.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 72716393a820832d7fd6f6084f4ac9534fdc7ccf09c10f5aa8d2f129828a0cee
+# Source file git blob SHA: 457555cc1c83cb617a6838e0099fc93e1d715b49
+# Source file size: 37567 bytes
+
+# --- src/xrpld/app/consensus/RCLConsensus.cpp lines 770-805 ---
+RCLCxLedger
+RCLConsensus::Adaptor::buildLCL(
+    RCLCxLedger const& previousLedger,
+    CanonicalTXSet& retriableTxs,
+    NetClock::time_point closeTime,
+    bool closeTimeCorrect,
+    NetClock::duration closeResolution,
+    std::chrono::milliseconds roundTime,
+    std::set<TxID>& failedTxs)
+{
+    std::shared_ptr<Ledger> built = [&]() {
+        if (auto const replayData = ledgerMaster_.releaseReplay())
+        {
+            XRPL_ASSERT(
+                replayData->parent()->info().hash == previousLedger.id(),
+                "ripple::RCLConsensus::Adaptor::buildLCL : parent hash match");
+            return buildLedger(*replayData, tapNONE, app_, j_);
+        }
+        return buildLedger(
+            previousLedger.ledger_,
+            closeTime,
+            closeTimeCorrect,
+            closeResolution,
+            app_,
+            retriableTxs,
+            failedTxs,
+            j_);
+    }();
+
+    // Update fee computations based on accepted txs
+    using namespace std::chrono_literals;
+    app_.getTxQ().processClosedLedger(app_, *built, roundTime > 5s);
+
+    // And stash the ledger in the ledger master
+    if (ledgerMaster_.storeLedger(built))
+        JLOG(j_.debug()) << "Consensus built ledger we already had";
