@@ -1,0 +1,34 @@
+# Source excerpt E35 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/tx/detail/applySteps.cpp, lines 190-215.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 0f1c540a5577263fe6e1e968d2b0b7150902e90daf43aaa66824953ba51d1413
+# Source file git blob SHA: 0413b4fb7ef4603f42c217b2590f1a582a7d7523
+# Source file size: 14678 bytes
+
+# --- src/xrpld/app/tx/detail/applySteps.cpp lines 190-215 ---
+                // transaction doesn't list one, preflight will have already
+                // a flagged a failure.
+                auto const id = ctx.tx.getAccountID(sfAccount);
+
+                if (id != beast::zero)
+                {
+                    if (NotTEC const preSigResult = [&]() -> NotTEC {
+                            if (NotTEC const result =
+                                    T::checkSeqProxy(ctx.view, ctx.tx, ctx.j))
+                                return result;
+
+                            if (NotTEC const result =
+                                    T::checkPriorTxAndLastLedger(ctx))
+                                return result;
+
+                            if (NotTEC const result = T::checkSign(ctx))
+                                return result;
+
+                            return tesSUCCESS;
+                        }())
+                        return preSigResult;
+
+                    if (TER const result = T::checkFee(
+                            ctx, calculateBaseFee(ctx.view, ctx.tx)))
+                        return result;
+

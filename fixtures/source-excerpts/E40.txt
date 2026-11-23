@@ -1,0 +1,44 @@
+# Source excerpt E40 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/DisputedTx.h, lines 275-310.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 49c22b1cc25a55834b59dff8ee0161ef7b973a9110844d1b6af1001a1ebc9149
+# Source file git blob SHA: 19df205249720c26747d359ec6f9542395c2c038
+# Source file size: 11494 bytes
+
+# --- src/xrpld/consensus/DisputedTx.h lines 275-310 ---
+}
+
+template <class Tx_t, class NodeID_t>
+bool
+DisputedTx<Tx_t, NodeID_t>::updateVote(
+    int percentTime,
+    bool proposing,
+    ConsensusParms const& p)
+{
+    if (ourVote_ && (nays_ == 0))
+        return false;
+
+    if (!ourVote_ && (yays_ == 0))
+        return false;
+
+    bool newPosition;
+    int weight;
+
+    // When proposing, to prevent avalanche stalls, we increase the needed
+    // weight slightly over time. We also need to ensure that the consensus has
+    // made a minimum number of attempts at each "state" before moving
+    // to the next.
+    // Proposing or not, we need to keep track of which state we've reached so
+    // we can determine if the vote has stalled.
+    auto const [requiredPct, newState] = getNeededWeight(
+        p, avalancheState_, percentTime, ++avalancheCounter_, p.avMIN_ROUNDS);
+    if (newState)
+    {
+        avalancheState_ = *newState;
+        avalancheCounter_ = 0;
+    }
+
+    if (proposing)  // give ourselves full weight
+    {
+        // This is basically the percentage of nodes voting 'yes' (including us)
+        weight = (yays_ * 100 + (ourVote_ ? 100 : 0)) / (nays_ + yays_ + 1);

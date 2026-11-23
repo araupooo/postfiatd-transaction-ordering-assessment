@@ -1,0 +1,19 @@
+# Source excerpt E36 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/tx/detail/applySteps.cpp, lines 290-300.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 0f1c540a5577263fe6e1e968d2b0b7150902e90daf43aaa66824953ba51d1413
+# Source file git blob SHA: 0413b4fb7ef4603f42c217b2590f1a582a7d7523
+# Source file size: 14678 bytes
+
+# --- src/xrpld/app/tx/detail/applySteps.cpp lines 290-300 ---
+    , sequencesConsumed_(tx.getSeqProxy().isSeq() ? 1 : 0)
+{
+}
+
+TxConsequences::TxConsequences(STTx const& tx, Category category)
+    : TxConsequences(tx)
+{
+    isBlocker_ = (category == blocker);
+}
+
+TxConsequences::TxConsequences(STTx const& tx, XRPAmount potentialSpend)

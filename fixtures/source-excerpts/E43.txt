@@ -1,0 +1,28 @@
+# Source excerpt E43 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/Validations.h, lines 1031-1050.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: e08b8fca2955b9c45c4673b4e873712c8d7ded405e3952ee011adea53c3d19da
+# Source file git blob SHA: c333aeaefd7890bf1c7d19e56eadbae0b788602e
+# Source file size: 39557 bytes
+
+# --- src/xrpld/consensus/Validations.h lines 1031-1050 ---
+    /** Count the number of trusted full validations for the given ledger
+
+        @param ledgerID The identifier of ledger of interest
+        @return The number of trusted validations
+    */
+    std::size_t
+    numTrustedForLedger(ID const& ledgerID)
+    {
+        std::size_t count = 0;
+        std::lock_guard lock{mutex_};
+        byLedger(
+            lock,
+            ledgerID,
+            [&](std::size_t) {},  // nothing to reserve
+            [&](NodeID const&, Validation const& v) {
+                if (v.trusted() && v.full())
+                    ++count;
+            });
+        return count;
+    }

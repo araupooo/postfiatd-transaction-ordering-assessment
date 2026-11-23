@@ -1,0 +1,46 @@
+# Source excerpt E44 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/ValidatorList.cpp, lines 1898-1935.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: a1499c9c0f43be56ea657b2940701a38898117fb0dbdf83cf481de65cad503d4
+# Source file git blob SHA: 861e2112c1f9355e03b9e42a7565cf6f37cf8c2e
+# Source file size: 72746 bytes
+
+# --- src/xrpld/app/misc/detail/ValidatorList.cpp lines 1898-1935 ---
+    // Use a 67% quorum to balance fork safety, liveness, and required UNL
+    // overlap. Note: Original XRPL uses 80%, but this fork uses 67% for
+    // devnet/testnet. For mainnet, this should be reverted to 80%.
+    //
+    // Theorem 8 of the Analysis of the XRP Ledger Consensus Protocol
+    // (https://arxiv.org/abs/1802.07242) says:
+    //     XRP LCP guarantees fork safety if Oi,j > nj/2 + ni − qi + ti,j
+    //     for every pair of nodes Pi, Pj.
+    //
+    // ni: size of Pi's UNL
+    // nj: size of Pj's UNL
+    // Oi,j: number of validators in both UNLs
+    // qi: validation quorum for Pi's UNL
+    // ti, tj: maximum number of allowed Byzantine faults in Pi and Pj's
+    // UNLs ti,j: min{ti, tj, Oi,j}
+    //
+    // Assume ni < nj, meaning and ti,j = ti
+    //
+    // For qi = .67*ni, we make ti <= .33*ni
+    // (We could make ti lower and tolerate less UNL overlap. However in
+    // order to prioritize safety over liveness, we need ti >= ni - qi)
+    //
+    // A 67% quorum allows two UNLs to safely have < .33*ni unique
+    // validators between them:
+    //
+    // pi = ni - Oi,j
+    // pj = nj - Oi,j
+    //
+    // Oi,j > nj/2 + ni − qi + ti,j
+    // ni - pi > (ni - pi + pj)/2 + ni − .67*ni + .33*ni
+    // pi + pj < .33*ni
+    //
+    // Note that the negative UNL protocol introduced the
+    // AbsoluteMinimumQuorum which is 60% of the original UNL size. The
+    // effective quorum should not be lower than it.
+    return static_cast<std::size_t>(std::max(
+        std::ceil(effectiveUnlSize * 0.67f), std::ceil(unlSize * 0.6f)));
+}

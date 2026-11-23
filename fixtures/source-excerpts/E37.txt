@@ -1,0 +1,16 @@
+# Source excerpt E37 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/ConsensusParms.h, lines 75-82.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 95f6ea2da07862ff830ab2eaab0f3b384fb89b29260a6b717b2f6c2b7380cca7
+# Source file git blob SHA: d565bd9a5228de171cc777a0a098592f9e8505df
+# Source file size: 8302 bytes
+
+# --- src/xrpld/consensus/ConsensusParms.h lines 75-82 ---
+    // Consensus durations are relative to the internal Consensus clock and use
+    // millisecond resolution.
+
+    //! The percentage threshold above which we can declare consensus.
+    std::size_t const minCONSENSUS_PCT = 67;
+
+    //! The duration a ledger may remain idle before closing
+    std::chrono::milliseconds const ledgerIDLE_INTERVAL =

@@ -1,0 +1,42 @@
+# Source excerpt E42 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/Validations.h, lines 837-870.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: e08b8fca2955b9c45c4673b4e873712c8d7ded405e3952ee011adea53c3d19da
+# Source file git blob SHA: c333aeaefd7890bf1c7d19e56eadbae0b788602e
+# Source file size: 39557 bytes
+
+# --- src/xrpld/consensus/Validations.h lines 837-870 ---
+    /** Return the sequence number and ID of the preferred working ledger
+
+        A ledger is preferred if it has more support amongst trusted validators
+        and is *not* an ancestor of the current working ledger; otherwise it
+        remains the current working ledger.
+
+        @param curr The local node's current working ledger
+
+        @return The sequence and id of the preferred working ledger,
+                or std::nullopt if no trusted validations are available to
+                determine the preferred ledger.
+    */
+    std::optional<std::pair<Seq, ID>>
+    getPreferred(Ledger const& curr)
+    {
+        std::lock_guard lock{mutex_};
+        std::optional<SpanTip<Ledger>> preferred =
+            withTrie(lock, [this](LedgerTrie<Ledger>& trie) {
+                return trie.getPreferred(localSeqEnforcer_.largest());
+            });
+        // No trusted validations to determine branch
+        if (!preferred)
+        {
+            // fall back to majority over acquiring ledgers
+            auto it = std::max_element(
+                acquiring_.begin(),
+                acquiring_.end(),
+                [](auto const& a, auto const& b) {
+                    std::pair<Seq, ID> const& aKey = a.first;
+                    typename hash_set<NodeID>::size_type const& aSize =
+                        a.second.size();
+                    std::pair<Seq, ID> const& bKey = b.first;
+                    typename hash_set<NodeID>::size_type const& bSize =
+                        b.second.size();

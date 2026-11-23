@@ -1,0 +1,24 @@
+# Source excerpt E45 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/ledger/detail/LedgerMaster.cpp, lines 900-915.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: eff20a953d6b6fafe7ca44a2999a4c90c5ef62eea82e43baed8ba3e959da5ef1
+# Source file git blob SHA: 67826c253286c69622334382ac89db711c7a60d2
+# Source file size: 70382 bytes
+
+# --- src/xrpld/app/ledger/detail/LedgerMaster.cpp lines 900-915 ---
+    std::size_t valCount = 0;
+
+    if (seq != 0)
+    {
+        // Ledger is too old
+        if (seq < mValidLedgerSeq)
+            return;
+
+        auto validations = app_.validators().negativeUNLFilter(
+            app_.getValidations().getTrustedForLedger(hash, seq));
+        valCount = validations.size();
+        if (valCount >= app_.validators().quorum())
+        {
+            std::lock_guard ml(m_mutex);
+            if (seq > mLastValidLedger.second)
+                mLastValidLedger = std::make_pair(hash, seq);

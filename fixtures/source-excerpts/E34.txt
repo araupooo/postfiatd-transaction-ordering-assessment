@@ -1,0 +1,27 @@
+# Source excerpt E34 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/tx/detail/Transactor.cpp, lines 582-600.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: f68aed0f1eb6e592100bfcf3a7e5ef4e28c1e77ddc5cdcdc4dc3a7502fd625f4
+# Source file git blob SHA: fb84c40ff2e300e756bee1b4e3d3b995c44d343d
+# Source file size: 46576 bytes
+
+# --- src/xrpld/app/tx/detail/Transactor.cpp lines 582-600 ---
+Transactor::consumeSeqProxy(SLE::pointer const& sleAccount)
+{
+    XRPL_ASSERT(
+        sleAccount, "ripple::Transactor::consumeSeqProxy : non-null account");
+    SeqProxy const seqProx = ctx_.tx.getSeqProxy();
+    if (seqProx.isSeq())
+    {
+        // Note that if this transaction is a TicketCreate, then
+        // the transaction will modify the account root sfSequence
+        // yet again.
+        sleAccount->setFieldU32(sfSequence, seqProx.value() + 1);
+        return tesSUCCESS;
+    }
+    return ticketDelete(
+        view(), account_, getTicketIndex(account_, seqProx), j_);
+}
+
+// Remove a single Ticket from the ledger.
+TER

@@ -1,0 +1,54 @@
+# Source excerpt E41 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/LedgerTrie.h, lines 625-670.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: ad4bd848f137566143a3929d6fa26ff56d2754480da4a1f12c5e22b8ef4bd4de
+# Source file git blob SHA: 17f9e570b0e80d13414bd0a0369e38124d432b0e
+# Source file size: 27368 bytes
+
+# --- src/xrpld/consensus/LedgerTrie.h lines 625-670 ---
+    /** Return the preferred ledger ID
+
+        The preferred ledger is used to determine the working ledger
+        for consensus amongst competing alternatives.
+
+        Recall that each validator is normally validating a chain of ledgers,
+        e.g. A->B->C->D. However, if due to network connectivity or other
+        issues, validators generate different chains
+
+        @code
+               /->C
+           A->B
+               \->D->E
+        @endcode
+
+        we need a way for validators to converge on the chain with the most
+        support. We call this the preferred ledger.  Intuitively, the idea is to
+        be conservative and only switch to a different branch when you see
+        enough peer validations to *know* another branch won't have preferred
+        support.
+
+        The preferred ledger is found by walking this tree of validated ledgers
+        starting from the common ancestor ledger.
+
+        At each sequence number, we have
+
+           - The prior sequence preferred ledger, e.g. B.
+           - The (tip) support of ledgers with this sequence number,e.g. the
+             number of validators whose last validation was for C or D.
+           - The (branch) total support of all descendants of the current
+             sequence number ledgers, e.g. the branch support of D is the
+             tip support of D plus the tip support of E; the branch support of
+             C is just the tip support of C.
+           - The number of validators that have yet to validate a ledger
+             with this sequence number (uncommitted support). Uncommitted
+             includes all validators whose last sequence number is smaller than
+             our last issued sequence number, since due to asynchrony, we may
+             not have heard from those nodes yet.
+
+        The preferred ledger for this sequence number is then the ledger
+        with relative majority of support, where uncommitted support
+        can be given to ANY ledger at that sequence number
+        (including one not yet known). If no such preferred ledger exists, then
+        the prior sequence preferred ledger is the overall preferred ledger.
+
+        In this example, for D to be preferred, the number of validators
