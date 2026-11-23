@@ -1,0 +1,10 @@
+# run.log — deterministic output digests (no timestamps, no absolute paths)
+# step extract_excerpts: pass
+# step ordering_model_config: pass
+# step simulator: pass
+# step probe: pass
+876f6d35ac9047238700284af7c9aef19a8c6bbb03ea9677b9d6d473d6e0c43e  outputs/derived/ordering-results.json
+4c16bc12e2edf244a11095a6d7f134246934d227c727c596680e8b5d3d7cc621  outputs/derived/probe-results.json
+577ea48f0759b92ae36b9c427b52b594c2cc6181bdb59c17014c846660b2e88e  outputs/derived/run-summary.json
+35c0a78a63436697daa57f1ba4da5d49d452a1c0aa36537c354962703fac61dd  outputs/derived/scenario-matrix.json
+92b0767e4306153f42ad390d0aab37eab87aef9ac9fa1f4d0157eae601438c33  outputs/probe-run.log

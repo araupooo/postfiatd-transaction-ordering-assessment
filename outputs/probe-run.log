@@ -1,0 +1,16 @@
+PASS A-00 pinned checkout HEAD equals the pinned commit — HEAD=0085a1ff885d6a446369cf73a4430f75af22be55
+PASS A-01 38 rules: 33 VERIFIED anchors inside cited ranges, 1 SPECIFIED (external URLs), 2 MODELLED, 2 UNTESTABLE, none with a faked source — 33/1/2/2
+PASS B-01 per-scenario arithmetic reconciles; totals 46 in / 27 admitted / 1 dup / 2 not-queueable / 1 replaced / 2 rejected / 2 blocked / 0 cap-rejected / 4 evicted / 1 expired / 6 deferred — totals={'admitted': 27, 'blocked_by_gap': 2, 'cap_rejected': 0, 'deferred': 6, 'duplicate': 1, 'evicted': 4, 'expired': 1, 'input': 46, 'not_queueable': 2, 'rejected_duplicate': 2, 'replaced': 1, 'scenarios': 8}
+PASS C-01 TxQ.h OrderCandidates: feeLevel descending, then (txID XOR parentHash) ascending — grep-verified in TxQ.h
+PASS D-01 strict replacement > (TxQ.cpp:913), cap 10 (TxQ.h:148), tefMAX_LEDGER inclusive (Transactor.cpp:571-573), expiry <= (TxQ.cpp:1379-1405) — 4 tokens at recorded lines
+PASS E-01 CanonicalTXSet Key orders by salted account key, then SeqProxy, then txID — CanonicalTXSet.cpp:28-44 + accountKey 46-56
+PASS F-01 matrix == results == scenarios (8); findings 12, claims 24 (16/2/4/2), risks 14, gaps 8; excerpts 61 across 25 files agree across manifest, files, hashes — all counts reconcile
+PASS G-01 determinism: simulator re-run reproduces byte-identical results and matrix (full SHA-256) — results shipped=876f6d35ac9047238700284af7c9aef19a8c6bbb03ea9677b9d6d473d6e0c43e rerun=876f6d35ac9047238700284af7c9aef19a8c6bbb03ea9677b9d6d473d6e0c43e; matrix shipped=35c0a78a63436697daa57f1ba4da5d49d452a1c0aa36537c354962703fac61dd rerun=35c0a78a63436697daa57f1ba4da5d49d452a1c0aa36537c354962703fac61dd
+PASS H-01 every excerpt digest matches source-hashes.json; every manifest blob SHA/size matches the checkout; run-manifest digests match shipped derived files — 61 excerpt digests + blob SHAs verified
+PASS I-01 fee escalation is QUADRATIC (current^2/target^2, TxQ.cpp:173-195); avalanche ladder is 50/65/70/95 (ConsensusParms.h:146-157) — code verified; docs saying 'exponential' or '50/60' are stale
+PASS J-01 67% quorum in this fork with the 80%-revert-for-mainnet comment (ValidatorList.cpp:1898-1900); amendment threshold 'slightly less than 80%' (AmendmentTable.cpp:368) — both verified
+PASS T-01 timing sanity: total probe elapsed_ms is non-negative (loose band, never exact) — value not recorded; never compared
+probe: 12/12 checks PASS
+probe: ordering-results.json sha256: 876f6d35ac9047238700284af7c9aef19a8c6bbb03ea9677b9d6d473d6e0c43e
+probe: scenario-matrix.json sha256: 35c0a78a63436697daa57f1ba4da5d49d452a1c0aa36537c354962703fac61dd
+probe: pinned commit 0085a1ff885d6a446369cf73a4430f75af22be55
