@@ -1,0 +1,173 @@
+{
+ "findings": [
+  {
+   "detail": "TxQ orders by fee level descending, ties by (txID XOR parentHash) ascending (R-01). Two validators with different parent hashes order the same equal-fee queue differently; consensus agrees the tx set, never the queue order (R-36).",
+   "evidence": [
+    "fixtures/source-excerpts/E05.txt",
+    "outputs/derived/ordering-results.json"
+   ],
+   "id": "F-01",
+   "rules": [
+    "R-01",
+    "R-36"
+   ],
+   "severity": "HIGH",
+   "status": "VERIFIED",
+   "title": "Same-fee queue order is parent-hash-salted, so queue order is local, never consensus-agreed"
+  },
+  {
+   "detail": "ValidatorList.cpp:1898-1900 states a 67% quorum for devnet/testnet with a comment that mainnet should revert to 80% (R-28). Any simulator or safety argument assuming 80% is wrong for this codebase; the fork-safety margin depends on UNL overlap per the cited theorem (arXiv:1802.07242).",
+   "evidence": [
+    "fixtures/source-excerpts/E44.txt",
+    "docs/citations.md"
+   ],
+   "id": "F-02",
+   "rules": [
+    "R-28",
+    "R-34"
+   ],
+   "severity": "HIGH",
+   "status": "VERIFIED",
+   "title": "This fork validates at a 67% quorum, not upstream XRPL's 80%"
+  },
+  {
+   "detail": "Preclaim fails with tefMAX_LEDGER only when view.seq() > LastLedgerSequence (R-14), so a transaction may still be included in the ledger whose seq equals its LLS; queued transactions with LLS <= closed ledger seq are evicted (R-13). The off-by-one is in the ledger index compared (open seq vs closed seq); a simulator using one comparison for both is wrong. S-04 reproduces both boundaries.",
+   "evidence": [
+    "fixtures/source-excerpts/E33.txt",
+    "fixtures/source-excerpts/E16.txt",
+    "outputs/derived/ordering-results.json"
+   ],
+   "id": "F-03",
+   "rules": [
+    "R-13",
+    "R-14"
+   ],
+   "severity": "HIGH",
+   "status": "VERIFIED",
+   "title": "LastLedgerSequence is inclusive at preclaim but eviction uses <= at close \u2014 the same boundary value means different things"
+  },
+  {
+   "detail": "scaleFeeLevel returns multiplier x current^2 / target^2 once the open ledger passes txnsExpected (R-03, TxQ.cpp:173-195). A simulator using exponential growth over-prices spikes.",
+   "evidence": [
+    "fixtures/source-excerpts/E09.txt"
+   ],
+   "id": "F-04",
+   "rules": [
+    "R-03"
+   ],
+   "severity": "MEDIUM",
+   "status": "VERIFIED",
+   "title": "Fee escalation is quadratic in code, not exponential as docs say"
+  },
+  {
+   "detail": "ConsensusParms.h avalancheCutoffs: init 50%, mid 65%, late 70%, stuck 95% (R-18). Code wins; docs are stale on this point.",
+   "evidence": [
+    "fixtures/source-excerpts/E38.txt"
+   ],
+   "id": "F-05",
+   "rules": [
+    "R-18"
+   ],
+   "severity": "MEDIUM",
+   "status": "VERIFIED",
+   "title": "The dispute avalanche ladder in code is 50/65/70/95, not the 50/60/... quoted in some XRPL docs"
+  },
+  {
+   "detail": "A new transaction is admitted to a full queue only if its fee beats the average fee of the cheapest account's queued transactions, and the victim is that account's last (highest-sequence) transaction (R-31). A cheap transaction can survive inside a high-average account while a mid-fee transaction elsewhere is evicted. S-05 models this.",
+   "evidence": [
+    "fixtures/source-excerpts/E15.txt",
+    "outputs/derived/ordering-results.json"
+   ],
+   "id": "F-06",
+   "rules": [
+    "R-31"
+   ],
+   "severity": "MEDIUM",
+   "status": "VERIFIED",
+   "title": "Queue-full eviction is per-account-average, not global-lowest-fee"
+  },
+  {
+   "detail": "TxQ.cpp:913 uses a strict `feeLevelPaid > requiredRetryLevel` comparison (R-11). S-02 shows the exact-25% case (512 -> 640) rejected while 512 -> 665 succeeds.",
+   "evidence": [
+    "fixtures/source-excerpts/E14.txt",
+    "outputs/derived/ordering-results.json"
+   ],
+   "id": "F-07",
+   "rules": [
+    "R-11"
+   ],
+   "severity": "MEDIUM",
+   "status": "VERIFIED",
+   "title": "Replacement requires STRICTLY more than +25%; exactly +25% is rejected"
+  },
+  {
+   "detail": "Submitting two payloads at one sequence costs nothing beyond the fee of the one that applies: the first to apply wins, later ones get tefPAST_SEQ, and the queue treats the second as a replacement candidate (R-24). No slashing, no account flag.",
+   "evidence": [
+    "fixtures/source-excerpts/E32.txt",
+    "fixtures/source-excerpts/E14.txt"
+   ],
+   "id": "F-08",
+   "rules": [
+    "R-24"
+   ],
+   "severity": "MEDIUM",
+   "status": "VERIFIED",
+   "title": "No equivocation penalty exists"
+  },
+  {
+   "detail": "Proposed-but-unaccepted transactions are tracked and warned every 15 ledgers; detection never forces inclusion or reorders anything (R-33). A transaction can be delayed indefinitely by repeated NO votes with no in-protocol remedy.",
+   "evidence": [
+    "fixtures/source-excerpts/E58.txt"
+   ],
+   "id": "F-09",
+   "rules": [
+    "R-33"
+   ],
+   "severity": "LOW",
+   "status": "VERIFIED",
+   "title": "Censorship detection only warns every 15 ledgers"
+  },
+  {
+   "detail": "Blocker transactions (SetRegularKey, SignerListSet, etc.) must be alone in an account's queue: a blocker is rejected if the account already has queued transactions, and no further transaction may queue behind one (R-25).",
+   "evidence": [
+    "fixtures/source-excerpts/E36.txt"
+   ],
+   "id": "F-10",
+   "rules": [
+    "R-25"
+   ],
+   "severity": "LOW",
+   "status": "VERIFIED",
+   "title": "Blocker transactions serialise an account's queue"
+  },
+  {
+   "detail": "Fee escalation can no longer be toggled off by amendment vote in this build; its behaviour is unconditional (R-30).",
+   "evidence": [
+    "fixtures/source-excerpts/E56.txt"
+   ],
+   "id": "F-11",
+   "rules": [
+    "R-30"
+   ],
+   "severity": "LOW",
+   "status": "VERIFIED",
+   "title": "FeeEscalation is a retired amendment"
+  },
+  {
+   "detail": "Locally-submitted transactions are re-applied to new open ledgers for up to 5 ledgers (holdLedgers, R-26). A locally-submitted transaction lost in a fork longer than 5 ledgers is silently dropped from re-proposal.",
+   "evidence": [
+    "fixtures/source-excerpts/E51.txt",
+    "fixtures/source-excerpts/E50.txt"
+   ],
+   "id": "F-12",
+   "rules": [
+    "R-26"
+   ],
+   "severity": "LOW",
+   "status": "VERIFIED",
+   "title": "Local-transaction re-proposal lasts only 5 ledgers"
+  }
+ ],
+ "pack": "Deterministic Transaction Ordering in postfiatd",
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55"
+}

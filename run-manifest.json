@@ -1,0 +1,69 @@
+{
+ "pack": "Deterministic Transaction Ordering in postfiatd",
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+ "counts": {
+  "rules": {
+   "total": 38,
+   "by_status": {
+    "VERIFIED": 33,
+    "SPECIFIED": 1,
+    "MODELLED": 2,
+    "UNTESTABLE": 2
+   }
+  },
+  "scenarios": {
+   "total": 8,
+   "input": 46,
+   "admitted": 27,
+   "duplicate": 1,
+   "not_queueable": 2,
+   "expired": 1,
+   "replaced": 1,
+   "rejected_duplicate": 2,
+   "blocked_by_gap": 2,
+   "cap_rejected": 0,
+   "evicted": 4,
+   "deferred": 6
+  },
+  "findings": {
+   "total": 12,
+   "by_severity": {
+    "HIGH": 3,
+    "LOW": 4,
+    "MEDIUM": 5
+   },
+   "by_status": {
+    "VERIFIED": 12
+   }
+  },
+  "claims": {
+   "total": 24,
+   "by_status": {
+    "MODELLED": 4,
+    "SPECIFIED": 2,
+    "UNTESTABLE": 2,
+    "VERIFIED": 16
+   }
+  },
+  "risks": {
+   "total": 14,
+   "by_severity": {
+    "HIGH": 3,
+    "LOW": 3,
+    "MEDIUM": 8
+   }
+  },
+  "gaps": 8
+ },
+ "probes": {
+  "passed": 12,
+  "total": 12
+ },
+ "results_sha256": "876f6d35ac9047238700284af7c9aef19a8c6bbb03ea9677b9d6d473d6e0c43e",
+ "matrix_sha256": "35c0a78a63436697daa57f1ba4da5d49d452a1c0aa36537c354962703fac61dd",
+ "verification": {
+  "excerpts": 61,
+  "source_files": 25
+ },
+ "status": "SOURCE-DERIVED"
+}
