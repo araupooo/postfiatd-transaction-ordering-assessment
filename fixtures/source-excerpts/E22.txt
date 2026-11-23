@@ -1,0 +1,29 @@
+# Source excerpt E22 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/CanonicalTXSet.h, lines 30-50.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: b4f7e170c1e30a824d799f077848fc60d5c9e4f9f003b753e97cda74d1e977f2
+# Source file git blob SHA: b061ff10dd664269a2696fb8b25eb0040f754bb4
+# Source file size: 4501 bytes
+
+# --- src/xrpld/app/misc/CanonicalTXSet.h lines 30-50 ---
+/** Holds transactions which were deferred to the next pass of consensus.
+
+    "Canonical" refers to the order in which transactions are applied.
+
+    - Puts transactions from the same account in SeqProxy order
+
+*/
+// VFALCO TODO rename to SortedTxSet
+class CanonicalTXSet : public CountedObject<CanonicalTXSet>
+{
+private:
+    class Key
+    {
+    public:
+        Key(uint256 const& account, SeqProxy seqProx, uint256 const& id)
+            : account_(account), txId_(id), seqProxy_(seqProx)
+        {
+        }
+
+        friend bool
+        operator<(Key const& lhs, Key const& rhs);

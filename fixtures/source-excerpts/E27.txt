@@ -1,0 +1,64 @@
+# Source excerpt E27 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/ledger/OpenLedger.h, lines 215-270.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 651357961c3fc897f91b1c5920c05fae7e6abf9d39139f1050f9167646b0e457
+# Source file git blob SHA: 9383a5357593b179f4e799d2669dd5ffd07a7f32
+# Source file size: 8650 bytes
+
+# --- src/xrpld/app/ledger/OpenLedger.h lines 215-270 ---
+    FwdRange const& txs,
+    OrderedTxs& retries,
+    ApplyFlags flags,
+    beast::Journal j)
+{
+    for (auto iter = txs.begin(); iter != txs.end(); ++iter)
+    {
+        try
+        {
+            // Dereferencing the iterator can throw since it may be transformed.
+            auto const tx = *iter;
+            auto const txId = tx->getTransactionID();
+            if (check.txExists(txId))
+                continue;
+            auto const result = apply_one(app, view, tx, true, flags, j);
+            if (result == Result::retry)
+                retries.insert(tx);
+        }
+        catch (std::exception const& e)
+        {
+            JLOG(j.error())
+                << "OpenLedger::apply: Caught exception: " << e.what();
+        }
+    }
+    bool retry = true;
+    for (int pass = 0; pass < LEDGER_TOTAL_PASSES; ++pass)
+    {
+        int changes = 0;
+        auto iter = retries.begin();
+        while (iter != retries.end())
+        {
+            switch (apply_one(app, view, iter->second, retry, flags, j))
+            {
+                case Result::success:
+                    ++changes;
+                    [[fallthrough]];
+                case Result::failure:
+                    iter = retries.erase(iter);
+                    break;
+                case Result::retry:
+                    ++iter;
+            }
+        }
+        // A non-retry pass made no changes
+        if (!changes && !retry)
+            return;
+        // Stop retriable passes
+        if (!changes || (pass >= LEDGER_RETRY_PASSES))
+            retry = false;
+    }
+
+    // If there are any transactions left, we must have
+    // tried them in at least one final pass
+    XRPL_ASSERT(
+        retries.empty() || !retry, "ripple::OpenLedger::apply : valid retries");
+}

@@ -1,0 +1,79 @@
+# Source excerpt E32 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/tx/detail/Transactor.cpp, lines 480-550.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: f68aed0f1eb6e592100bfcf3a7e5ef4e28c1e77ddc5cdcdc4dc3a7502fd625f4
+# Source file git blob SHA: fb84c40ff2e300e756bee1b4e3d3b995c44d343d
+# Source file size: 46576 bytes
+
+# --- src/xrpld/app/tx/detail/Transactor.cpp lines 480-550 ---
+Transactor::checkSeqProxy(
+    ReadView const& view,
+    STTx const& tx,
+    beast::Journal j)
+{
+    auto const id = tx.getAccountID(sfAccount);
+
+    auto const sle = view.read(keylet::account(id));
+
+    if (!sle)
+    {
+        JLOG(j.trace())
+            << "applyTransaction: delay: source account does not exist "
+            << toBase58(id);
+        return terNO_ACCOUNT;
+    }
+
+    SeqProxy const t_seqProx = tx.getSeqProxy();
+    SeqProxy const a_seq = SeqProxy::sequence((*sle)[sfSequence]);
+
+    if (t_seqProx.isSeq())
+    {
+        if (tx.isFieldPresent(sfTicketSequence) &&
+            view.rules().enabled(featureTicketBatch))
+        {
+            JLOG(j.trace()) << "applyTransaction: has both a TicketSequence "
+                               "and a non-zero Sequence number";
+            return temSEQ_AND_TICKET;
+        }
+        if (t_seqProx != a_seq)
+        {
+            if (a_seq < t_seqProx)
+            {
+                JLOG(j.trace())
+                    << "applyTransaction: has future sequence number "
+                    << "a_seq=" << a_seq << " t_seq=" << t_seqProx;
+                return terPRE_SEQ;
+            }
+            // It's an already-used sequence number.
+            JLOG(j.trace()) << "applyTransaction: has past sequence number "
+                            << "a_seq=" << a_seq << " t_seq=" << t_seqProx;
+            return tefPAST_SEQ;
+        }
+    }
+    else if (t_seqProx.isTicket())
+    {
+        // Bypass the type comparison. Apples and oranges.
+        if (a_seq.value() <= t_seqProx.value())
+        {
+            // If the Ticket number is greater than or equal to the
+            // account sequence there's the possibility that the
+            // transaction to create the Ticket has not hit the ledger
+            // yet.  Allow a retry.
+            JLOG(j.trace()) << "applyTransaction: has future ticket id "
+                            << "a_seq=" << a_seq << " t_seq=" << t_seqProx;
+            return terPRE_TICKET;
+        }
+
+        // Transaction can never succeed if the Ticket is not in the ledger.
+        if (!view.exists(keylet::ticket(id, t_seqProx)))
+        {
+            JLOG(j.trace())
+                << "applyTransaction: ticket already used or never created "
+                << "a_seq=" << a_seq << " t_seq=" << t_seqProx;
+            return tefNO_TICKET;
+        }
+    }
+
+    return tesSUCCESS;
+}
+

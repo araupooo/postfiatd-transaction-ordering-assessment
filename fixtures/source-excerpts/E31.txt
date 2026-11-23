@@ -1,0 +1,39 @@
+# Source excerpt E31 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/tx/detail/Transactor.cpp, lines 380-410.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: f68aed0f1eb6e592100bfcf3a7e5ef4e28c1e77ddc5cdcdc4dc3a7502fd625f4
+# Source file git blob SHA: fb84c40ff2e300e756bee1b4e3d3b995c44d343d
+# Source file size: 46576 bytes
+
+# --- src/xrpld/app/tx/detail/Transactor.cpp lines 380-410 ---
+Transactor::checkFee(PreclaimContext const& ctx, XRPAmount baseFee)
+{
+    if (!ctx.tx[sfFee].native())
+        return temBAD_FEE;
+
+    auto const feePaid = ctx.tx[sfFee].xrp();
+
+    if (ctx.flags & tapBATCH)
+    {
+        if (feePaid == beast::zero)
+            return tesSUCCESS;
+
+        JLOG(ctx.j.trace()) << "Batch: Fee must be zero.";
+        return temBAD_FEE;  // LCOV_EXCL_LINE
+    }
+
+    if (!isLegalAmount(feePaid) || feePaid < beast::zero)
+        return temBAD_FEE;
+
+    // Only check fee is sufficient when the ledger is open.
+    if (ctx.view.open())
+    {
+        auto const feeDue =
+            minimumFee(ctx.app, baseFee, ctx.view.fees(), ctx.flags);
+
+        if (feePaid < feeDue)
+        {
+            JLOG(ctx.j.trace())
+                << "Insufficient fee paid: " << to_string(feePaid) << "/"
+                << to_string(feeDue);
+            return telINSUF_FEE_P;

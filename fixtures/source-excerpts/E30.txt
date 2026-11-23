@@ -1,0 +1,26 @@
+# Source excerpt E30 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/tx/detail/Transactor.cpp, lines 331-348.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: f68aed0f1eb6e592100bfcf3a7e5ef4e28c1e77ddc5cdcdc4dc3a7502fd625f4
+# Source file git blob SHA: fb84c40ff2e300e756bee1b4e3d3b995c44d343d
+# Source file size: 46576 bytes
+
+# --- src/xrpld/app/tx/detail/Transactor.cpp lines 331-348 ---
+Transactor::calculateBaseFee(ReadView const& view, STTx const& tx)
+{
+    // Returns the fee in fee units.
+
+    // The computation has two parts:
+    //  * The base fee, which is the same for most transactions.
+    //  * The additional cost of each multisignature on the transaction.
+    XRPAmount const baseFee = view.fees().base;
+
+    // Each signer adds one more baseFee to the minimum required fee
+    // for the transaction.
+    std::size_t const signerCount =
+        tx.isFieldPresent(sfSigners) ? tx.getFieldArray(sfSigners).size() : 0;
+
+    return baseFee + (signerCount * baseFee);
+}
+
+// Returns the fee in fee units, not scaled for load.

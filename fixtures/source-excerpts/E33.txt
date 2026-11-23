@@ -1,0 +1,37 @@
+# Source excerpt E33 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/tx/detail/Transactor.cpp, lines 552-580.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: f68aed0f1eb6e592100bfcf3a7e5ef4e28c1e77ddc5cdcdc4dc3a7502fd625f4
+# Source file git blob SHA: fb84c40ff2e300e756bee1b4e3d3b995c44d343d
+# Source file size: 46576 bytes
+
+# --- src/xrpld/app/tx/detail/Transactor.cpp lines 552-580 ---
+Transactor::checkPriorTxAndLastLedger(PreclaimContext const& ctx)
+{
+    auto const id = ctx.tx.getAccountID(sfAccount);
+
+    auto const sle = ctx.view.read(keylet::account(id));
+
+    if (!sle)
+    {
+        JLOG(ctx.j.trace())
+            << "applyTransaction: delay: source account does not exist "
+            << toBase58(id);
+        return terNO_ACCOUNT;
+    }
+
+    if (ctx.tx.isFieldPresent(sfAccountTxnID) &&
+        (sle->getFieldH256(sfAccountTxnID) !=
+         ctx.tx.getFieldH256(sfAccountTxnID)))
+        return tefWRONG_PRIOR;
+
+    if (ctx.tx.isFieldPresent(sfLastLedgerSequence) &&
+        (ctx.view.seq() > ctx.tx.getFieldU32(sfLastLedgerSequence)))
+        return tefMAX_LEDGER;
+
+    if (ctx.view.txExists(ctx.tx.getTransactionID()))
+        return tefALREADY;
+
+    return tesSUCCESS;
+}
+

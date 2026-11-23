@@ -1,0 +1,40 @@
+# Source excerpt E25 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/CanonicalTXSet.cpp, lines 62-93.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 924a4a582c76ce9655ac4aa1ef2c89145ab409733aa17562d80f2c5dcc63f331
+# Source file git blob SHA: 41ee1988e1f9ddd3a46deb15f89a82c48c6a36f5
+# Source file size: 3159 bytes
+
+# --- src/xrpld/app/misc/CanonicalTXSet.cpp lines 62-93 ---
+CanonicalTXSet::popAcctTransaction(std::shared_ptr<STTx const> const& tx)
+{
+    // Determining the next viable transaction for an account with Tickets:
+    //
+    //  1. Prioritize transactions with Sequences over transactions with
+    //     Tickets.
+    //
+    //  2. For transactions not using Tickets, look for consecutive Sequence
+    //     numbers. For transactions using Tickets, don't worry about
+    //     consecutive Sequence numbers. Tickets can process out of order.
+    //
+    //  3. After handling all transactions with Sequences, return Tickets
+    //     with the lowest Ticket ID first.
+    std::shared_ptr<STTx const> result;
+    uint256 const effectiveAccount{accountKey(tx->getAccountID(sfAccount))};
+
+    auto const seqProxy = tx->getSeqProxy();
+    Key const after(effectiveAccount, seqProxy, beast::zero);
+    auto const itrNext{map_.lower_bound(after)};
+    if (itrNext != map_.end() &&
+        itrNext->first.getAccount() == effectiveAccount &&
+        (!itrNext->second->getSeqProxy().isSeq() ||
+         itrNext->second->getSeqProxy().value() == seqProxy.value() + 1))
+    {
+        result = std::move(itrNext->second);
+        map_.erase(itrNext);
+    }
+
+    return result;
+}
+
+}  // namespace ripple

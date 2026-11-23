@@ -1,0 +1,31 @@
+# Source excerpt E28 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/ledger/detail/OpenLedger.cpp, lines 174-196.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: aacc1a260bb823929380eb10936667dbc19116f91e6cdecba231c1ff24098a54
+# Source file git blob SHA: 64a080053fd8a06e288f60bc15815d3a666837cf
+# Source file size: 7010 bytes
+
+# --- src/xrpld/app/ledger/detail/OpenLedger.cpp lines 174-196 ---
+OpenLedger::apply_one(
+    Application& app,
+    OpenView& view,
+    std::shared_ptr<STTx const> const& tx,
+    bool retry,
+    ApplyFlags flags,
+    beast::Journal j) -> Result
+{
+    if (retry)
+        flags = flags | tapRETRY;
+    // If it's in anybody's proposed set, try to keep it in the ledger
+    auto const result = ripple::apply(app, view, *tx, flags, j);
+    if (result.applied || result.ter == terQUEUED)
+        return Result::success;
+    if (isTefFailure(result.ter) || isTemMalformed(result.ter) ||
+        isTelLocal(result.ter))
+        return Result::failure;
+    return Result::retry;
+}
+
+//------------------------------------------------------------------------------
+
+std::string

@@ -1,0 +1,17 @@
+# Source excerpt E26 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/ledger/OpenLedger.h, lines 38-46.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 651357961c3fc897f91b1c5920c05fae7e6abf9d39139f1050f9167646b0e457
+# Source file git blob SHA: 9383a5357593b179f4e799d2669dd5ffd07a7f32
+# Source file size: 8650 bytes
+
+# --- src/xrpld/app/ledger/OpenLedger.h lines 38-46 ---
+// How many total extra passes we make
+// We must ensure we make at least one non-retriable pass
+#define LEDGER_TOTAL_PASSES 3
+
+// How many extra retry passes we
+// make if the previous retry pass made changes
+#define LEDGER_RETRY_PASSES 1
+
+using OrderedTxs = CanonicalTXSet;

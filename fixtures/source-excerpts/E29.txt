@@ -1,0 +1,74 @@
+# Source excerpt E29 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/ledger/detail/OpenLedger.cpp, lines 80-145.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: aacc1a260bb823929380eb10936667dbc19116f91e6cdecba231c1ff24098a54
+# Source file git blob SHA: 64a080053fd8a06e288f60bc15815d3a666837cf
+# Source file size: 7010 bytes
+
+# --- src/xrpld/app/ledger/detail/OpenLedger.cpp lines 80-145 ---
+    std::string const& suffix,
+    modify_type const& f)
+{
+    JLOG(j_.trace()) << "accept ledger " << ledger->seq() << " " << suffix;
+    auto next = create(rules, ledger);
+    if (retriesFirst)
+    {
+        // Handle disputed tx, outside lock
+        using empty = std::vector<std::shared_ptr<STTx const>>;
+        apply(app, *next, *ledger, empty{}, retries, flags, j_);
+    }
+    // Block calls to modify, otherwise
+    // new tx going into the open ledger
+    // would get lost.
+    std::lock_guard lock1(modify_mutex_);
+    // Apply tx from the current open view
+    if (!current_->txs.empty())
+    {
+        apply(
+            app,
+            *next,
+            *ledger,
+            boost::adaptors::transform(
+                current_->txs,
+                [](std::pair<
+                    std::shared_ptr<STTx const>,
+                    std::shared_ptr<STObject const>> const& p) {
+                    return p.first;
+                }),
+            retries,
+            flags,
+            j_);
+    }
+    // Call the modifier
+    if (f)
+        f(*next, j_);
+    // Apply local tx
+    for (auto const& item : locals)
+        app.getTxQ().apply(app, *next, item.second, flags, j_);
+
+    // If we didn't relay this transaction recently, relay it to all peers
+    for (auto const& txpair : next->txs)
+    {
+        auto const& tx = txpair.first;
+        auto const txId = tx->getTransactionID();
+
+        // skip batch txns
+        // The flag should only be settable if Batch feature is enabled. If
+        // Batch is not enabled, the flag is always invalid, so don't relay it
+        // regardless.
+        // LCOV_EXCL_START
+        if (tx->isFlag(tfInnerBatchTxn))
+        {
+            XRPL_ASSERT(
+                txpair.second && txpair.second->isFieldPresent(sfParentBatchID),
+                "Inner Batch transaction missing sfParentBatchID");
+            continue;
+        }
+        // LCOV_EXCL_STOP
+
+        if (auto const toSkip = app.getHashRouter().shouldRelay(txId))
+        {
+            JLOG(j_.debug()) << "Relaying recovered tx " << txId;
+            protocol::TMTransaction msg;
+            Serializer s;
+
