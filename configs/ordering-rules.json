@@ -1,0 +1,589 @@
+{
+ "note": "Rules R-01..R-33 VERIFIED against the pinned checkout (grep-verified line ranges; every rule carries the anchor of its linked excerpt, which sits inside the cited range). R-34 SPECIFIED from protocol docs. R-35/R-36 MODELLED inferences grounded in verified rules. R-37/R-38 UNTESTABLE from source alone. Where XRPL docs disagree with the code (escalation 'exponential' vs quadratic; avalanche 50/60 vs 50/65/70/95), this pack follows the code.",
+ "pack": "Deterministic Transaction Ordering in postfiatd",
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+ "rules": [
+  {
+   "external": null,
+   "id": "R-01",
+   "note": "Tie-break is deterministic per ledger but unpredictable in advance; same-fee order changes when the parent hash changes.",
+   "primary_source": "`src/xrpld/app/misc/TxQ.h:630-660` (E05)",
+   "source": {
+    "anchor": "pseudo-randomized transaction ID",
+    "end_line": 660,
+    "excerpt": "E05",
+    "file": "src/xrpld/app/misc/TxQ.h",
+    "start_line": 630
+   },
+   "statement": "TxQ orders queued transactions by fee level descending; ties break by pseudo-randomised txID ascending: `(txID ^ parentHash)`, where parentHash is the open ledger's parent hash.",
+   "status": "VERIFIED",
+   "title": "TxQ orders queued transactions by fee level descending; ties break by pseudo-randomised tx"
+  },
+  {
+   "external": null,
+   "id": "R-02",
+   "note": "Fee level = drops \u00d7 256 / base fee (see R-19).",
+   "primary_source": "`src/xrpld/app/misc/TxQ.h:60-66` (E01); `src/xrpld/app/misc/FeeEscalation.md:50-70` (E53)",
+   "source": {
+    "anchor": "baseLevel{256}",
+    "end_line": 66,
+    "excerpt": "E01",
+    "file": "src/xrpld/app/misc/TxQ.h",
+    "start_line": 60
+   },
+   "statement": "Reference fee level is 256 (`baseLevel`); a reference transaction paying the base fee has fee level 256.",
+   "status": "VERIFIED",
+   "title": "Reference fee level is 256 (`baseLevel`); a reference transaction paying the base fee has "
+  },
+  {
+   "external": null,
+   "id": "R-03",
+   "note": "Quadratic, not exponential in the code; docs call the growth \"exponential\" loosely.",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:173-195` (E09)",
+   "source": {
+    "anchor": "current * current",
+    "end_line": 195,
+    "excerpt": "E09",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 173
+   },
+   "statement": "Open-ledger required fee level is flat 256 while tx count \u2264 `txnsExpected`; above it, required level = `escalationMultiplier \u00d7 current\u00b2 / target\u00b2` (quadratic).",
+   "status": "VERIFIED",
+   "title": "Open-ledger required fee level is flat 256 while tx count \u2264 `txnsExpected`; above it, requ"
+  },
+  {
+   "external": null,
+   "id": "R-04",
+   "note": "Median is computed over fee levels of txs in the validated ledger.",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:88-170` (E08); `src/xrpld/app/misc/TxQ.h:78-110` (E02)",
+   "source": {
+    "anchor": "escalationMultiplier_ =",
+    "end_line": 170,
+    "excerpt": "E08",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 88
+   },
+   "statement": "Escalation multiplier = median fee level of the last closed ledger (average of the two middle values), floored at `baseLevel \u00d7 500` = 128,000; reset to that floor on an empty ledger.",
+   "status": "VERIFIED",
+   "title": "Escalation multiplier = median fee level of the last closed ledger (average of the two mid"
+  },
+  {
+   "external": null,
+   "id": "R-05",
+   "note": "\"Healthy\" = round \u2264 5 s in the caller (`RCLConsensus.cpp:801`, E60).",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:88-170` (E08); `src/xrpld/app/misc/TxQ.h:78-110` (E02); `src/xrpld/app/misc/TxQ.h:128-156` (E03)",
+   "source": {
+    "anchor": "escalationMultiplier_ =",
+    "end_line": 170,
+    "excerpt": "E08",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 88
+   },
+   "statement": "`txnsExpected` adapts: +20% of last ledger size (max of last 20 over-target ledgers, shrink 10% per step) when consensus is healthy; cut 50% (of size and of expectation) on a slow round (`timeLeap`); floors: min 32 txs/ledger (1000 standalone), target 256.",
+   "status": "VERIFIED",
+   "title": "`txnsExpected` adapts: +20% of last ledger size (max of last 20 over-target ledgers, shrin"
+  },
+  {
+   "external": null,
+   "id": "R-06",
+   "note": "A future-sequence tx can never direct-apply, however high its fee.",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:1679-1715` (E20)",
+   "source": {
+    "anchor": "feeLevelPaid >= requiredFeeLevel",
+    "end_line": 1715,
+    "excerpt": "E20",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1679
+   },
+   "statement": "A transaction whose fee level \u2265 required level is attempted directly in the open ledger (direct apply), bypassing the queue \u2014 but only if its SeqProxy equals the account sequence or it uses a ticket.",
+   "status": "VERIFIED",
+   "title": "A transaction whose fee level \u2265 required level is attempted directly in the open ledger (d"
+  },
+  {
+   "external": null,
+   "id": "R-07",
+   "note": "`break`, not skip: lower-fee txs behind it are not tried in that pass.",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:1455-1480` (E17); `src/xrpld/app/misc/detail/TxQ.cpp:1485-1565` (E18)",
+   "source": {
+    "anchor": "feeLevelPaid >= requiredFeeLevel",
+    "end_line": 1480,
+    "excerpt": "E17",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1455
+   },
+   "statement": "`TxQ::accept` drains the queue highest-fee-first into the new open ledger and STOPS at the first candidate whose fee level < current required level (required level rises as txs are added).",
+   "status": "VERIFIED",
+   "title": "`TxQ::accept` drains the queue highest-fee-first into the new open ledger and STOPS at the"
+  },
+  {
+   "external": null,
+   "id": "R-08",
+   "note": "Skipped candidates are revisited only via `eraseAndAdvance` to the next sequence.",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:1455-1480` (E17); `src/xrpld/app/misc/detail/TxQ.cpp:1485-1565` (E18)",
+   "source": {
+    "anchor": "Skipping queued transaction",
+    "end_line": 1480,
+    "excerpt": "E17",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1455
+   },
+   "statement": "Per-account sequence order is enforced inside `accept`: a sequence-based candidate that is not the account's first queued sequence is skipped until the earlier one applies. Ticket-based txs may apply in any order.",
+   "status": "VERIFIED",
+   "title": "Per-account sequence order is enforced inside `accept`: a sequence-based candidate that is"
+  },
+  {
+   "external": null,
+   "id": "R-09",
+   "note": "This is a transaction-count cap, not a byte/memory cap.",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:1366-1405` (E16)",
+   "source": {
+    "anchor": "lastValid <= ledgerSeq",
+    "end_line": 1405,
+    "excerpt": "E16",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1366
+   },
+   "statement": "Maximum queue size is dynamic: `max(txnsExpected \u00d7 20, 2000)` transactions, recomputed on each closed ledger (not on slow rounds).",
+   "status": "VERIFIED",
+   "title": "Maximum queue size is dynamic: `max(txnsExpected \u00d7 20, 2000)` transactions, recomputed on "
+  },
+  {
+   "external": null,
+   "id": "R-10",
+   "note": "Tickets can never fill a sequence gap (`telCAN_NOT_QUEUE_FULL`).",
+   "primary_source": "`src/xrpld/app/misc/TxQ.h:128-156` (E03); `src/xrpld/app/misc/detail/TxQ.cpp:411-451` (E13)",
+   "source": {
+    "anchor": "maximumTxnPerAccount = 10",
+    "end_line": 156,
+    "excerpt": "E03",
+    "file": "src/xrpld/app/misc/TxQ.h",
+    "start_line": 128
+   },
+   "statement": "One account may queue at most 10 transactions; the only exception is a tx that fills the first expiration-based sequence gap for that account.",
+   "status": "VERIFIED",
+   "title": "One account may queue at most 10 transactions; the only exception is a tx that fills the f"
+  },
+  {
+   "external": null,
+   "id": "R-11",
+   "note": "Strict `>` \u2014 exactly +25% is NOT enough. Replacement is removed from `byFee_` only if the new tx later succeeds.",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:860-915` (E14); `src/xrpld/app/misc/TxQ.h:78-110` (E02)",
+   "source": {
+    "anchor": "requiredRetryLevel",
+    "end_line": 915,
+    "excerpt": "E14",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 860
+   },
+   "statement": "Replacing a queued tx with the same SeqProxy requires fee level strictly greater than the old level \u00d7 1.25 (`retrySequencePercent` = 25).",
+   "status": "VERIFIED",
+   "title": "Replacing a queued tx with the same SeqProxy requires fee level strictly greater than the "
+  },
+  {
+   "external": null,
+   "id": "R-12",
+   "note": "`ter` results do not consume the queue slot, only a retry.",
+   "primary_source": "`src/xrpld/app/misc/TxQ.h:580-592` (E04); `src/xrpld/app/misc/detail/TxQ.cpp:1485-1565` (E18)",
+   "source": {
+    "anchor": "retriesAllowed = 10",
+    "end_line": 592,
+    "excerpt": "E04",
+    "file": "src/xrpld/app/misc/TxQ.h",
+    "start_line": 580
+   },
+   "statement": "A queued tx gets 10 apply retries (`retriesAllowed`); exhaustion sets the account `retryPenalty` (a penalised account's later txs get `retriesRemaining` forced down to 1 when above 2); any `tef`/`tem` failure or expiry sets `dropPenalty` (account's txs dropped first when the queue is \u226595% full).",
+   "status": "VERIFIED",
+   "title": "A queued tx gets 10 apply retries (`retriesAllowed`); exhaustion sets the account `retryPe"
+  },
+  {
+   "external": null,
+   "id": "R-13",
+   "note": "Eviction is `\u2264`, i.e. a tx is dead once the ledger whose seq equals its LLS closes.",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:384-410` (E12); `src/xrpld/app/misc/detail/TxQ.cpp:1366-1405` (E16)",
+   "source": {
+    "anchor": "telCAN_NOT_QUEUE",
+    "end_line": 410,
+    "excerpt": "E12",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 384
+   },
+   "statement": "Queueability requires `LastLedgerSequence \u2265 current ledger seq + 2` (`minimumLastLedgerBuffer`); on each closed ledger, queued txs with `LastLedgerSequence \u2264 closed ledger seq` are evicted and the account gets `dropPenalty`.",
+   "status": "VERIFIED",
+   "title": "Queueability requires `LastLedgerSequence \u2265 current ledger seq + 2` (`minimumLastLedgerBuf"
+  },
+  {
+   "external": null,
+   "id": "R-14",
+   "note": "The race is at close time: inclusion in ledger N is decided by consensus on N, but preclaim runs against the open view whose seq is N.",
+   "primary_source": "`src/xrpld/app/tx/detail/Transactor.cpp:552-580` (E33)",
+   "source": {
+    "anchor": "tefMAX_LEDGER",
+    "end_line": 580,
+    "excerpt": "E33",
+    "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+    "start_line": 552
+   },
+   "statement": "`LastLedgerSequence` is INCLUSIVE: preclaim fails with `tefMAX_LEDGER` only when `view.seq() > LastLedgerSequence`, so a tx may still be included in the ledger whose seq equals its LLS.",
+   "status": "VERIFIED",
+   "title": "`LastLedgerSequence` is INCLUSIVE: preclaim fails with `tefMAX_LEDGER` only when `view"
+  },
+  {
+   "external": null,
+   "id": "R-15",
+   "note": "Salt is the hash of the agreed tx set, so the order is deterministic given the set but unpredictable before agreement.",
+   "primary_source": "`src/xrpld/app/misc/CanonicalTXSet.cpp:28-44` (E23); `src/xrpld/app/misc/CanonicalTXSet.cpp:46-56` (E24); `src/xrpld/app/misc/CanonicalTXSet.h:30-50` (E22)",
+   "source": {
+    "anchor": "lhs.seqProxy_ < rhs.seqProxy_",
+    "end_line": 44,
+    "excerpt": "E23",
+    "file": "src/xrpld/app/misc/CanonicalTXSet.cpp",
+    "start_line": 28
+   },
+   "statement": "Canonical application order for a consensus ledger: salted account key first (`account XOR tx-set hash`), then SeqProxy ascending, then txID ascending.",
+   "status": "VERIFIED",
+   "title": "Canonical application order for a consensus ledger: salted account key first (`account XOR"
+  },
+  {
+   "external": null,
+   "id": "R-16",
+   "note": "Same pass structure in `buildLedger`'s `applyTransactions`.",
+   "primary_source": "`src/xrpld/app/ledger/OpenLedger.h:38-46,215-270` (E26/E27); `src/xrpld/app/ledger/detail/BuildLedger.cpp:100-145` (E49)",
+   "source": {
+    "anchor": "LEDGER_TOTAL_PASSES 3",
+    "end_line": 46,
+    "excerpt": "E26",
+    "file": "src/xrpld/app/ledger/OpenLedger.h",
+    "start_line": 38
+   },
+   "statement": "Open-ledger application iterates the canonical set in order, skips txs already in the ledger (`txExists`), retries failures over 3 total passes (1 retry pass after the first pass that makes no change stops retrying), and leaves leftovers in `retries`.",
+   "status": "VERIFIED",
+   "title": "Open-ledger application iterates the canonical set in order, skips txs already in the ledg"
+  },
+  {
+   "external": null,
+   "id": "R-17",
+   "note": "\"Retries first\" is a property of `OpenLedger::accept(..., retriesFirst=true)`.",
+   "primary_source": "`src/xrpld/app/consensus/RCLConsensus.cpp:515-535` (E47); `src/xrpld/app/consensus/RCLConsensus.cpp:625-660` (E48)",
+   "source": {
+    "anchor": "unpredictable but deterministic order",
+    "end_line": 535,
+    "excerpt": "E47",
+    "file": "src/xrpld/app/consensus/RCLConsensus.cpp",
+    "start_line": 515
+   },
+   "statement": "The consensus-built ledger is assembled from a `CanonicalTXSet` salted by the agreed transaction-set hash (`result.txns.map_->getHash()`); disputed txs the node voted NO on are re-inserted first into the NEXT open ledger (retries-first).",
+   "status": "VERIFIED",
+   "title": "The consensus-built ledger is assembled from a `CanonicalTXSet` salted by the agreed trans"
+  },
+  {
+   "external": null,
+   "id": "R-18",
+   "note": "Note: the 50/65/70/95 ladder in code differs from the 50/60/... ladder quoted in some XRPL docs \u2014 code wins.",
+   "primary_source": "`src/xrpld/consensus/ConsensusParms.h:140-170` (E38); `src/xrpld/consensus/DisputedTx.h:88-135,275-310` (E39/E40)",
+   "source": {
+    "anchor": "avalancheCutoffs",
+    "end_line": 170,
+    "excerpt": "E38",
+    "file": "src/xrpld/consensus/ConsensusParms.h",
+    "start_line": 140
+   },
+   "statement": "Consensus dispute resolution is an avalanche: required YES weight rises 50% \u2192 65% \u2192 70% \u2192 95% as the round progresses (states init/mid/late/stuck, at 0%/50%/85%/200% of prior round time), min 2 rounds per state; a dispute counts as \"stalled\" only once the state machine has run its course and votes have been unchanged for \u22654 rounds, with support >67% or <33% (either direction).",
+   "status": "VERIFIED",
+   "title": "Consensus dispute resolution is an avalanche: required YES weight rises 50% \u2192 65% \u2192 70% \u2192 "
+  },
+  {
+   "external": null,
+   "id": "R-19",
+   "note": "A multi-signed tx pays more drops for the same fee level; fee level, not drops, is the ordering unit.",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:37-64` (E06); `src/xrpld/app/tx/detail/Transactor.cpp:331-348,380-410` (E30/E31)",
+   "source": {
+    "anchor": "mulDiv(effectiveFeePaid",
+    "end_line": 64,
+    "excerpt": "E06",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 37
+   },
+   "statement": "Fee level paid = `fee \u00d7 256 / baseFee` (with a +mod guard when base fee is 0); base fee for a tx = `view.fees().base \u00d7 (1 + signerCount)`; load-scaled minimum fee is enforced in `checkFee` (`telINSUF_FEE_P` if below).",
+   "status": "VERIFIED",
+   "title": "Fee level paid = `fee \u00d7 256 / baseFee` (with a +mod guard when base fee is 0); base fee fo"
+  },
+  {
+   "external": null,
+   "id": "R-20",
+   "note": "Load fee is per-server and local; it does not order txs, it gates admission.",
+   "primary_source": "`src/xrpld/app/misc/LoadFeeTrack.h:140-150` (E52)",
+   "source": {
+    "anchor": "lftNormalFee =",
+    "end_line": 150,
+    "excerpt": "E52",
+    "file": "src/xrpld/app/misc/LoadFeeTrack.h",
+    "start_line": 140
+   },
+   "statement": "Local load fee: normal load factor 256, fee rises/falls by 1/4 per step, hard cap 256,000,000 (256 \u00d7 10\u2076). A tx below the server's load fee is ignored, not queued.",
+   "status": "VERIFIED",
+   "title": "Local load fee: normal load factor 256, fee rises/falls by 1/4 per step, hard cap 256,000,"
+  },
+  {
+   "external": null,
+   "id": "R-21",
+   "note": "Order of checks in `invoke_preclaim`: seq \u2192 prior-tx/LLS \u2192 signature \u2192 fee (E35).",
+   "primary_source": "`src/xrpld/app/tx/detail/Transactor.cpp:480-550` (E32)",
+   "source": {
+    "anchor": "has future sequence number",
+    "end_line": 550,
+    "excerpt": "E32",
+    "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+    "start_line": 480
+   },
+   "statement": "Sequence check (preclaim, before signature check): future sequence \u2192 `terPRE_SEQ` (retryable); past sequence \u2192 `tefPAST_SEQ` (final); future ticket \u2192 `terPRE_TICKET`; ticket absent/used \u2192 `tefNO_TICKET`; missing account \u2192 `terNO_ACCOUNT`.",
+   "status": "VERIFIED",
+   "title": "Sequence check (preclaim, before signature check): future sequence \u2192 `terPRE_SEQ` (retryab"
+  },
+  {
+   "external": null,
+   "id": "R-22",
+   "note": "Sequence reuse after a failed tx is impossible for `tes`/`tec`; only `ter`/`tef`/`tel`/`tem` leave the sequence free.",
+   "primary_source": "`src/xrpld/app/tx/detail/Transactor.cpp:582-600` (E34)",
+   "source": {
+    "anchor": "seqProx.value() + 1",
+    "end_line": 600,
+    "excerpt": "E34",
+    "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+    "start_line": 582
+   },
+   "statement": "Applying a sequence-based tx consumes the sequence: `AccountRoot.Sequence` is set to `tx Sequence + 1`; a ticket-based tx instead deletes the ticket. `tes` AND `tec` results both consume the sequence (both are applied to the ledger).",
+   "status": "VERIFIED",
+   "title": "Applying a sequence-based tx consumes the sequence: `AccountRoot"
+  },
+  {
+   "external": null,
+   "id": "R-23",
+   "note": "Dedup is hash-identity only: same account+sequence with a different payload is a DIFFERENT txID and is not deduped as a duplicate.",
+   "primary_source": "`src/xrpld/app/tx/detail/Transactor.cpp:552-580` (E33); `src/xrpld/app/ledger/OpenLedger.h:215-270` (E27); `src/xrpld/app/misc/HashRouter.h:260-275` (E59)",
+   "source": {
+    "anchor": "tefMAX_LEDGER",
+    "end_line": 580,
+    "excerpt": "E33",
+    "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+    "start_line": 552
+   },
+   "statement": "Duplicate detection is by tx hash at three layers: preclaim returns `tefALREADY` if `view.txExists(txID)`; open-ledger and build-ledger application skip txs already in the ledger; `HashRouter` suppresses re-relay/re-processing of recently seen hashes.",
+   "status": "VERIFIED",
+   "title": "Duplicate detection is by tx hash at three layers: preclaim returns `tefALREADY` if `view"
+  },
+  {
+   "external": null,
+   "id": "R-24",
+   "note": "There is no \"equivocation penalty\" in the pinned code: no slashing, no account flag for submitting two payloads at one sequence.",
+   "primary_source": "`src/xrpld/app/tx/detail/Transactor.cpp:480-550` (E32); `src/xrpld/app/misc/detail/TxQ.cpp:860-915` (E14)",
+   "source": {
+    "anchor": "has future sequence number",
+    "end_line": 550,
+    "excerpt": "E32",
+    "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+    "start_line": 480
+   },
+   "statement": "Same account + same sequence, different payload: the first to be applied wins; every later one gets `tefPAST_SEQ` (sequence already consumed). In the queue, the second is a replacement candidate under R-11 (same SeqProxy), not a second queued entry.",
+   "status": "VERIFIED",
+   "title": "Same account + same sequence, different payload: the first to be applied wins; every later"
+  },
+  {
+   "external": null,
+   "id": "R-25",
+   "note": "A blocker that replaces the lone queued tx is the only co-residency exception.",
+   "primary_source": "`src/xrpld/app/tx/detail/applySteps.cpp:290-300` (E36); `src/xrpld/app/misc/detail/TxQ.cpp:860-915` (E14)",
+   "source": {
+    "anchor": "isBlocker_ = (category == blocker)",
+    "end_line": 300,
+    "excerpt": "E36",
+    "file": "src/xrpld/app/tx/detail/applySteps.cpp",
+    "start_line": 290
+   },
+   "statement": "Blocker transactions (SetRegularKey, SignerListSet, etc. \u2014 `TxConsequences::isBlocker`) must be alone in an account's queue: a blocker is rejected if the account already has queued txs, and no further tx may queue behind a blocker.",
+   "status": "VERIFIED",
+   "title": "Blocker transactions (SetRegularKey, SignerListSet, etc"
+  },
+  {
+   "external": null,
+   "id": "R-26",
+   "note": "This is the rejoin safety net for locally-submitted txs lost in a fork (see R-30).",
+   "primary_source": "`src/xrpld/app/ledger/LocalTxs.h:35-45` (E51); `src/xrpld/app/ledger/detail/LocalTxs.cpp:55-70` (E50)",
+   "source": {
+    "anchor": "holdLedgers = 5",
+    "end_line": 45,
+    "excerpt": "E51",
+    "file": "src/xrpld/app/ledger/LocalTxs.h",
+    "start_line": 35
+   },
+   "statement": "Local transactions (submitted to this node) are re-applied to every new open ledger for up to 5 ledgers (`holdLedgers`), expiring at `min(submitSeq + 5, LastLedgerSequence + 1)`, until seen in a fully-validated ledger or impossible (`tefPAST_SEQ` / ticket gone).",
+   "status": "VERIFIED",
+   "title": "Local transactions (submitted to this node) are re-applied to every new open ledger for up"
+  },
+  {
+   "external": null,
+   "id": "R-27",
+   "note": "Conservative by design: a node switches branch only when it *knows* the other branch cannot win.",
+   "primary_source": "`src/xrpld/consensus/LedgerTrie.h:625-670` (E41); `src/xrpld/consensus/Validations.h:837-870` (E42)",
+   "source": {
+    "anchor": "preferred ledger is found by walking",
+    "end_line": 670,
+    "excerpt": "E41",
+    "file": "src/xrpld/consensus/LedgerTrie.h",
+    "start_line": 625
+   },
+   "statement": "Preferred-ledger rule on rejoin: walk the validation trie from the common ancestor; at each seq, a branch is preferred only if its branch support exceeds the rival branch support PLUS all uncommitted support; ties between children break by larger branch support, then larger span-start ledger ID.",
+   "status": "VERIFIED",
+   "title": "Preferred-ledger rule on rejoin: walk the validation trie from the common ancestor; at eac"
+  },
+  {
+   "external": null,
+   "id": "R-28",
+   "note": "Re-verified by grep in this pack: the 67% figure from the earlier partition pack is CORRECT for this fork; upstream 80% applies only if mainnet reverts it (comment in code).",
+   "primary_source": "`src/xrpld/app/misc/detail/ValidatorList.cpp:1898-1935` (E44); `src/xrpld/app/ledger/detail/LedgerMaster.cpp:900-915,950-960` (E45/E46)",
+   "source": {
+    "anchor": "Use a 67% quorum",
+    "end_line": 1935,
+    "excerpt": "E44",
+    "file": "src/xrpld/app/misc/detail/ValidatorList.cpp",
+    "start_line": 1898
+   },
+   "statement": "A ledger is fully validated when trusted full validations for it reach the node's quorum (`valCount >= quorum()`); the quorum in THIS FORK is `max(ceil(0.67 \u00d7 effective UNL), ceil(0.60 \u00d7 UNL))` \u2014 67%, NOT upstream XRPL's 80%.",
+   "status": "VERIFIED",
+   "title": "A ledger is fully validated when trusted full validations for it reach the node's quorum ("
+  },
+  {
+   "external": null,
+   "id": "R-29",
+   "note": "Threshold itself is computed in `computeThreshold` (same file, lines 323-335).",
+   "primary_source": "`src/xrpld/app/misc/detail/AmendmentTable.cpp:360-378` (E57)",
+   "source": {
+    "anchor": "slightly less than 80%",
+    "end_line": 378,
+    "excerpt": "E57",
+    "file": "src/xrpld/app/misc/detail/AmendmentTable.cpp",
+    "start_line": 360
+   },
+   "statement": "Amendment activation needs strictly more than the 80%-of-trusted-validations threshold (post-`fixAmendmentMajorityCalc`); the pre-fix code used `>=`, which could activate just under 80%.",
+   "status": "VERIFIED",
+   "title": "Amendment activation needs strictly more than the 80%-of-trusted-validations threshold (po"
+  },
+  {
+   "external": null,
+   "id": "R-30",
+   "note": "Searched the full 113-entry feature list for order/fee/queue/sequence/ticket/batch terms \u2014 nothing else is ordering-relevant.",
+   "primary_source": "`include/xrpl/protocol/detail/features.macro:100-106,148-152` (E55/E56)",
+   "source": {
+    "anchor": "TicketBatch",
+    "end_line": 106,
+    "excerpt": "E55",
+    "file": "include/xrpl/protocol/detail/features.macro",
+    "start_line": 100
+   },
+   "statement": "Ordering-related amendments in the pinned tree: `FeeEscalation` is RETIRED (its behaviour is now unconditional); `TicketBatch` (enabled by default vote) changes ticket/sequence handling; `Batch` and `BatchInnerSigs` are NOT supported; `PriceOracleOrder` is ordering-adjacent (oracle ordering, not tx ordering); no amendment in the tree changes the TxQ fee order or the canonical order.",
+   "status": "VERIFIED",
+   "title": "Ordering-related amendments in the pinned tree: `FeeEscalation` is RETIRED (its behaviour "
+  },
+  {
+   "external": null,
+   "id": "R-31",
+   "note": "Eviction is per-account-average, not global-lowest-tx: a cheap tx in a rich account can survive while a mid-fee tx in a cheap account is evicted.",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:1243-1260` (E15)",
+   "source": {
+    "anchor": "isFull()",
+    "end_line": 1260,
+    "excerpt": "E15",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1243
+   },
+   "statement": "When the queue is full, a new tx is admitted only if its fee level beats the average fee level of the cheapest account's queued txs (or that account's single tx); the victim is that account's LAST (highest-sequence) tx, and same-account victims are skipped.",
+   "status": "VERIFIED",
+   "title": "When the queue is full, a new tx is admitted only if its fee level beats the average fee l"
+  },
+  {
+   "external": null,
+   "id": "R-32",
+   "note": "Requires the new tx to be sequence-based, the account already queued, no prior failed attempt (`retriesRemaining == 10`), and fee above the required level.",
+   "primary_source": "`src/xrpld/app/misc/detail/TxQ.cpp:234-275` (E10); `src/xrpld/app/misc/detail/TxQ.cpp:860-915` (E14)",
+   "source": {
+    "anchor": "sumOfFirstSquares",
+    "end_line": 275,
+    "excerpt": "E10",
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 234
+   },
+   "statement": "Fee-averaging (\"rescue\"): a new high-fee tx can pull its account's whole queued series into the open ledger if the SUM of fee levels (queued series + new tx) covers the escalated series fee for the whole series; the series is applied all-or-nothing in sequence order.",
+   "status": "VERIFIED",
+   "title": "Fee-averaging (\"rescue\"): a new high-fee tx can pull its account's whole queued series int"
+  },
+  {
+   "external": null,
+   "id": "R-33",
+   "note": "A tx can be delayed indefinitely by repeated NO votes without any in-protocol remedy.",
+   "primary_source": "`src/xrpld/app/consensus/RCLCensorshipDetector.h:99-130` (E58); `src/xrpld/app/consensus/RCLConsensus.h:54-56` (E61)",
+   "source": {
+    "anchor": "Determine which transactions made it",
+    "end_line": 130,
+    "excerpt": "E58",
+    "file": "src/xrpld/app/consensus/RCLCensorshipDetector.h",
+    "start_line": 99
+   },
+   "statement": "Censorship detection is a warning only: proposed-but-unaccepted txs are tracked and warned every 15 ledgers; it never forces inclusion or reorders anything.",
+   "status": "VERIFIED",
+   "title": "Censorship detection is a warning only: proposed-but-unaccepted txs are tracked and warned"
+  },
+  {
+   "external": [
+    "https://xrpl.org/docs/concepts/consensus-protocol/negative-unl",
+    "https://learn.xrpl.org/course/intro-to-the-xrpl/lesson/how-the-xrp-ledger-works/"
+   ],
+   "id": "R-34",
+   "note": "The 80% figure is upstream XRPL; in this fork the quorum is 67% (R-28, VERIFIED). The \"same hash \u21d2 same order\" step is MODELLED from the hash covering the tx set \u2014 see R-35.",
+   "primary_source": "https://xrpl.org/docs/concepts/consensus-protocol/negative-unl \u2014 \"Each server independently decides a ledger version is validated when a quorum of its trusted validators agree\"; https://learn.xrpl.org/course/intro-to-the-xrpl/lesson/how-the-xrp-ledger-works/ \u2014 \"Once a supermajority (80%) of the network agrees on a proposed ledger, it is validated\"",
+   "source": null,
+   "statement": "A ledger is validated only when a quorum of trusted validators sign the SAME ledger hash (hence the same tx set AND the same canonical order); a node in the minority discards its version and fetches the preferred one (R-27).",
+   "status": "SPECIFIED",
+   "title": "A ledger is validated only when a quorum of trusted validators sign the SAME ledger hash ("
+  },
+  {
+   "external": null,
+   "id": "R-35",
+   "note": "The pinned code never states \"order is canonical\" in one sentence; it follows from `CanonicalTXSet` being the sole iteration order in `buildLedger`/`OpenLedger::apply`. A simulator may assume it, but must label it MODELLED.",
+   "primary_source": "Grounded in R-15/R-16/R-17 (VERIFIED)",
+   "source": null,
+   "statement": "Within a validated ledger, transaction application order is the canonical order (R-15), so two honest nodes that agree on the tx set necessarily agree on the order.",
+   "status": "MODELLED",
+   "title": "Within a validated ledger, transaction application order is the canonical order (R-15), so"
+  },
+  {
+   "external": null,
+   "id": "R-36",
+   "note": "No code path makes validators agree on queue order; agreement is only on the tx-set hash.",
+   "primary_source": "Grounded in R-01/R-15/R-18 (VERIFIED)",
+   "source": null,
+   "statement": "Two nodes with different open ledgers / different parent hashes will order same-fee queued txs differently (R-01 tie-break) and may propose different tx sets; consensus (R-18) resolves the SET, and the canonical order (R-15) then resolves the ORDER \u2014 queue order itself is never agreed directly.",
+   "status": "MODELLED",
+   "title": "Two nodes with different open ledgers / different parent hashes will order same-fee queued"
+  },
+  {
+   "external": null,
+   "id": "R-37",
+   "note": "Needs a live node (`fee` RPC) or a replayed ledger history.",
+   "primary_source": "\u2014 (negative claim)",
+   "source": null,
+   "statement": "Exact live fee levels, queue depth, `txnsExpected`, and escalation multiplier at any wall-clock time cannot be derived from source alone \u2014 they depend on the previous validated ledger's contents and round timing.",
+   "status": "UNTESTABLE",
+   "title": "Exact live fee levels, queue depth, `txnsExpected`, and escalation multiplier at any wall-"
+  },
+  {
+   "external": null,
+   "id": "R-38",
+   "note": "Needs live consensus observation or a multi-node simulation.",
+   "primary_source": "\u2014 (negative claim)",
+   "source": null,
+   "statement": "Whether a given disputed tx is included in a given round cannot be predicted from source alone \u2014 it depends on peer votes, round timing, and the avalanche state at that moment.",
+   "status": "UNTESTABLE",
+   "title": "Whether a given disputed tx is included in a given round cannot be predicted from source a"
+  }
+ ],
+ "schema_version": 1
+}

@@ -1,0 +1,483 @@
+{
+ "minimum_last_ledger_buffer": 2,
+ "pack": "Deterministic Transaction Ordering in postfiatd",
+ "parent_hash_seed": "postfiatd-ordering-pack-parent",
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+ "scenarios": [
+  {
+   "account_start_sequence": {
+    "rAcctA": 10,
+    "rAcctB": 20
+   },
+   "id": "S-01",
+   "ledger_seq": 100,
+   "max_queue_size": 2000,
+   "max_txns_per_ledger": 10,
+   "question": "Does a late-arriving high-fee transaction jump ahead of earlier low-fee transactions, and does the queue drain halt (not skip) at the first transaction below the rising required level?",
+   "required_fee_level": 512,
+   "title": "Fee-spike reordering",
+   "transactions": [
+    {
+     "account": "rAcctA",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000001",
+     "last_ledger_sequence": 200,
+     "sequence": 10
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000002",
+     "last_ledger_sequence": 200,
+     "sequence": 11
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000003",
+     "last_ledger_sequence": 200,
+     "sequence": 20
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000004",
+     "last_ledger_sequence": 200,
+     "sequence": 21
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 5120,
+     "id": "0000000000000000000000000000000000000000000000000000000000000005",
+     "last_ledger_sequence": 200,
+     "sequence": 12
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 300,
+     "id": "0000000000000000000000000000000000000000000000000000000000000006",
+     "last_ledger_sequence": 200,
+     "sequence": 22
+    }
+   ]
+  },
+  {
+   "account_start_sequence": {
+    "rAcctA": 10
+   },
+   "id": "S-02",
+   "ledger_seq": 100,
+   "max_queue_size": 2000,
+   "max_txns_per_ledger": 10,
+   "question": "Is an exact resubmission a no-op duplicate, is a different payload at the same sequence a replacement candidate, and does exactly +25% fail replacement (strictly greater required)?",
+   "required_fee_level": 256,
+   "title": "Duplicate / equivocating transactions",
+   "transactions": [
+    {
+     "account": "rAcctA",
+     "fee_level": 512,
+     "id": "000000000000000000000000000000000000000000000000000000000000000b",
+     "last_ledger_sequence": 200,
+     "sequence": 10
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 512,
+     "id": "000000000000000000000000000000000000000000000000000000000000000b",
+     "last_ledger_sequence": 200,
+     "sequence": 10
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 665,
+     "id": "000000000000000000000000000000000000000000000000000000000000000d",
+     "last_ledger_sequence": 200,
+     "sequence": 10
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 512,
+     "id": "000000000000000000000000000000000000000000000000000000000000000e",
+     "last_ledger_sequence": 200,
+     "sequence": 11
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 640,
+     "id": "000000000000000000000000000000000000000000000000000000000000000f",
+     "last_ledger_sequence": 200,
+     "sequence": 11
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 563,
+     "id": "0000000000000000000000000000000000000000000000000000000000000010",
+     "last_ledger_sequence": 200,
+     "sequence": 11
+    }
+   ]
+  },
+  {
+   "account_start_sequence": {
+    "rAcctA": 10
+   },
+   "id": "S-03",
+   "ledger_seq": 100,
+   "max_queue_size": 2000,
+   "max_txns_per_ledger": 10,
+   "question": "Does a missing sequence number block every later sequence-based transaction for that account, while a ticket-based transaction is unaffected?",
+   "required_fee_level": 256,
+   "title": "Sequence-number gaps",
+   "transactions": [
+    {
+     "account": "rAcctA",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000015",
+     "last_ledger_sequence": 200,
+     "sequence": 10
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000016",
+     "last_ledger_sequence": 200,
+     "sequence": 11
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000017",
+     "last_ledger_sequence": 200,
+     "sequence": 13
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000018",
+     "last_ledger_sequence": 200,
+     "sequence": 14
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 512,
+     "id": "0000000000000000000000000000000000000000000000000000000000000019",
+     "last_ledger_sequence": 200,
+     "sequence": 0,
+     "ticket": 98765
+    }
+   ]
+  },
+  {
+   "account_start_sequence": {
+    "rAcctA": 10,
+    "rAcctB": 20,
+    "rAcctC": 30,
+    "rAcctD": 40,
+    "rAcctE": 50,
+    "rAcctF": 60
+   },
+   "id": "S-04",
+   "ledger_seq": 100,
+   "max_queue_size": 2000,
+   "max_txns_per_ledger": 2,
+   "question": "Is LastLedgerSequence inclusive (a transaction may still be included in the ledger whose seq equals its LLS), is queueing refused when LLS < submit seq + 2, and is a queued transaction evicted once its LLS has gone by?",
+   "required_fee_level": 256,
+   "title": "LastLedgerSequence expiry races",
+   "transactions": [
+    {
+     "account": "rAcctA",
+     "fee_level": 1024,
+     "id": "000000000000000000000000000000000000000000000000000000000000001f",
+     "last_ledger_sequence": 102,
+     "sequence": 10,
+     "submit_ledger_seq": 100
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 512,
+     "id": "0000000000000000000000000000000000000000000000000000000000000020",
+     "last_ledger_sequence": 100,
+     "sequence": 20,
+     "submit_ledger_seq": 98
+    },
+    {
+     "account": "rAcctC",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000021",
+     "last_ledger_sequence": 99,
+     "sequence": 30,
+     "submit_ledger_seq": 97
+    },
+    {
+     "account": "rAcctD",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000022",
+     "last_ledger_sequence": 100,
+     "sequence": 40,
+     "submit_ledger_seq": 99
+    },
+    {
+     "account": "rAcctE",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000023",
+     "last_ledger_sequence": 101,
+     "sequence": 50,
+     "submit_ledger_seq": 100
+    },
+    {
+     "account": "rAcctF",
+     "fee_level": 128,
+     "id": "0000000000000000000000000000000000000000000000000000000000000024",
+     "last_ledger_sequence": 150,
+     "sequence": 60,
+     "submit_ledger_seq": 100
+    }
+   ]
+  },
+  {
+   "account_start_sequence": {
+    "rAcctA": 10,
+    "rAcctB": 20
+   },
+   "id": "S-05",
+   "ledger_seq": 100,
+   "max_queue_size": 8,
+   "max_txns_per_ledger": 10,
+   "question": "When the queue is full, is admission decided by per-account average fee (not global lowest fee), with the victim being the cheapest-average account's last (highest-sequence) transaction?",
+   "required_fee_level": 256,
+   "title": "Queue eviction under memory pressure",
+   "transactions": [
+    {
+     "account": "rAcctA",
+     "fee_level": 1024,
+     "id": "0000000000000000000000000000000000000000000000000000000000000028",
+     "last_ledger_sequence": 200,
+     "sequence": 10
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 1024,
+     "id": "0000000000000000000000000000000000000000000000000000000000000029",
+     "last_ledger_sequence": 200,
+     "sequence": 11
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 1024,
+     "id": "000000000000000000000000000000000000000000000000000000000000002a",
+     "last_ledger_sequence": 200,
+     "sequence": 12
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 1024,
+     "id": "000000000000000000000000000000000000000000000000000000000000002b",
+     "last_ledger_sequence": 200,
+     "sequence": 13
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 1024,
+     "id": "000000000000000000000000000000000000000000000000000000000000002c",
+     "last_ledger_sequence": 200,
+     "sequence": 14
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 1024,
+     "id": "000000000000000000000000000000000000000000000000000000000000002d",
+     "last_ledger_sequence": 200,
+     "sequence": 15
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000032",
+     "last_ledger_sequence": 200,
+     "sequence": 20
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000033",
+     "last_ledger_sequence": 200,
+     "sequence": 21
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000034",
+     "last_ledger_sequence": 200,
+     "sequence": 22
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000035",
+     "last_ledger_sequence": 200,
+     "sequence": 23
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000036",
+     "last_ledger_sequence": 200,
+     "sequence": 24
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000037",
+     "last_ledger_sequence": 200,
+     "sequence": 25
+    }
+   ]
+  },
+  {
+   "account_start_sequence": {
+    "rAcctA": 5,
+    "rAcctB": 5,
+    "rAcctC": 5
+   },
+   "id": "S-06",
+   "ledger_seq": 100,
+   "max_queue_size": 2000,
+   "max_txns_per_ledger": 10,
+   "question": "Do transactions from different accounts with the same sequence number never conflict (sequence is per-account), with cross-account application order given by the salted-account canonical order?",
+   "required_fee_level": 256,
+   "title": "Multi-account same-sequence races",
+   "transactions": [
+    {
+     "account": "rAcctA",
+     "fee_level": 512,
+     "id": "000000000000000000000000000000000000000000000000000000000000003d",
+     "last_ledger_sequence": 200,
+     "sequence": 5
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 512,
+     "id": "000000000000000000000000000000000000000000000000000000000000003e",
+     "last_ledger_sequence": 200,
+     "sequence": 5
+    },
+    {
+     "account": "rAcctC",
+     "fee_level": 512,
+     "id": "000000000000000000000000000000000000000000000000000000000000003f",
+     "last_ledger_sequence": 200,
+     "sequence": 5
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000040",
+     "last_ledger_sequence": 200,
+     "sequence": 6
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 1024,
+     "id": "0000000000000000000000000000000000000000000000000000000000000041",
+     "last_ledger_sequence": 200,
+     "sequence": 6
+    }
+   ]
+  },
+  {
+   "account_start_sequence": {
+    "rAcctA": 10
+   },
+   "amendment_vote_pct": 80.0,
+   "amendments": {
+    "Batch": "NOT supported (Supported::no)",
+    "BatchInnerSigs": "NOT supported",
+    "FeeEscalation": "RETIRED (behaviour unconditional)",
+    "PriceOracleOrder": "ordering-adjacent only (oracle ordering, not tx ordering)",
+    "TicketBatch": "enabled by default vote"
+   },
+   "id": "S-07",
+   "ledger_seq": 100,
+   "max_queue_size": 2000,
+   "max_txns_per_ledger": 10,
+   "question": "Does any amendment in the pinned tree change the TxQ fee order or the canonical order, and does an 80.0%-exactly vote activate an amendment under the post-fix strictly-greater rule?",
+   "required_fee_level": 256,
+   "title": "Amendment-flagged ordering changes",
+   "transactions": [
+    {
+     "account": "rAcctA",
+     "fee_level": 256,
+     "id": "0000000000000000000000000000000000000000000000000000000000000047",
+     "last_ledger_sequence": 200,
+     "sequence": 10
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 512,
+     "id": "0000000000000000000000000000000000000000000000000000000000000048",
+     "last_ledger_sequence": 200,
+     "sequence": 11
+    }
+   ]
+  },
+  {
+   "account_start_sequence": {
+    "rAcctA": 10,
+    "rAcctB": 20
+   },
+   "branches": {
+    "A": {
+     "support": 70
+    },
+    "B": {
+     "support": 20
+    },
+    "uncommitted": 5
+   },
+   "id": "S-08",
+   "ledger_seq": 100,
+   "max_queue_size": 2000,
+   "max_txns_per_ledger": 10,
+   "partition_parent_hashes": [
+    "partition-a",
+    "partition-c"
+   ],
+   "question": "Can two validators with different parent hashes order the same equal-fee transactions differently, which branch does a rejoining node prefer, and which transactions are re-proposed on rejoin?",
+   "required_fee_level": 256,
+   "title": "Partition-rejoin ordering divergence",
+   "transactions": [
+    {
+     "account": "rAcctA",
+     "fee_level": 512,
+     "id": "0000000000000000000000000000000000000000000000000000000000000051",
+     "last_ledger_sequence": 200,
+     "local": true,
+     "sequence": 10
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 512,
+     "id": "0000000000000000000000000000000000000000000000000000000000000052",
+     "last_ledger_sequence": 200,
+     "sequence": 20
+    },
+    {
+     "account": "rAcctA",
+     "fee_level": 512,
+     "id": "0000000000000000000000000000000000000000000000000000000000000053",
+     "last_ledger_sequence": 200,
+     "local": true,
+     "sequence": 11
+    },
+    {
+     "account": "rAcctB",
+     "fee_level": 512,
+     "id": "0000000000000000000000000000000000000000000000000000000000000054",
+     "last_ledger_sequence": 200,
+     "sequence": 21
+    }
+   ]
+  }
+ ],
+ "schema_version": 1
+}
