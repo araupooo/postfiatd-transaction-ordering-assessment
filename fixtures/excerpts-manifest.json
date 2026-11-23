@@ -1,0 +1,555 @@
+{
+ "excerpts": [
+  {
+   "anchor": "baseLevel{256}",
+   "blob_sha": "6afd83b0d0885f25cdac7de475e9dd1ebc167ed3",
+   "blob_size": 32999,
+   "end_line": 66,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E01",
+   "start_line": 60
+  },
+  {
+   "anchor": "ledgersInQueue = 20",
+   "blob_sha": "6afd83b0d0885f25cdac7de475e9dd1ebc167ed3",
+   "blob_size": 32999,
+   "end_line": 110,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E02",
+   "start_line": 78
+  },
+  {
+   "anchor": "maximumTxnPerAccount = 10",
+   "blob_sha": "6afd83b0d0885f25cdac7de475e9dd1ebc167ed3",
+   "blob_size": 32999,
+   "end_line": 156,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E03",
+   "start_line": 128
+  },
+  {
+   "anchor": "retriesAllowed = 10",
+   "blob_sha": "6afd83b0d0885f25cdac7de475e9dd1ebc167ed3",
+   "blob_size": 32999,
+   "end_line": 592,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E04",
+   "start_line": 580
+  },
+  {
+   "anchor": "pseudo-randomized transaction ID",
+   "blob_sha": "6afd83b0d0885f25cdac7de475e9dd1ebc167ed3",
+   "blob_size": 32999,
+   "end_line": 660,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E05",
+   "start_line": 630
+  },
+  {
+   "anchor": "mulDiv(effectiveFeePaid",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 64,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E06",
+   "start_line": 37
+  },
+  {
+   "anchor": "sfLastLedgerSequence",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 72,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E07",
+   "start_line": 67
+  },
+  {
+   "anchor": "escalationMultiplier_ =",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 170,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E08",
+   "start_line": 88
+  },
+  {
+   "anchor": "current * current",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 195,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E09",
+   "start_line": 173
+  },
+  {
+   "anchor": "sumOfFirstSquares",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 275,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E10",
+   "start_line": 234
+  },
+  {
+   "anchor": "isFull",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 383,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E11",
+   "start_line": 376
+  },
+  {
+   "anchor": "telCAN_NOT_QUEUE",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 410,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E12",
+   "start_line": 384
+  },
+  {
+   "anchor": "maximumTxnPerAccount",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 451,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E13",
+   "start_line": 411
+  },
+  {
+   "anchor": "requiredRetryLevel",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 915,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E14",
+   "start_line": 860
+  },
+  {
+   "anchor": "isFull()",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 1260,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E15",
+   "start_line": 1243
+  },
+  {
+   "anchor": "lastValid <= ledgerSeq",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 1405,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E16",
+   "start_line": 1366
+  },
+  {
+   "anchor": "feeLevelPaid >= requiredFeeLevel",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 1480,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E17",
+   "start_line": 1455
+  },
+  {
+   "anchor": "retryPenalty = true",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 1565,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E18",
+   "start_line": 1485
+  },
+  {
+   "anchor": "parentHashComp = parentHash",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 1600,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E19",
+   "start_line": 1580
+  },
+  {
+   "anchor": "feeLevelPaid >= requiredFeeLevel",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 1715,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E20",
+   "start_line": 1679
+  },
+  {
+   "anchor": "byFee_.rbegin()->feeLevel",
+   "blob_sha": "6924dae6c82d0608d9520a551fd52c4a3257daf8",
+   "blob_size": 78017,
+   "end_line": 1800,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E21",
+   "start_line": 1785
+  },
+  {
+   "anchor": "Puts transactions from the same account in SeqProxy order",
+   "blob_sha": "b061ff10dd664269a2696fb8b25eb0040f754bb4",
+   "blob_size": 4501,
+   "end_line": 50,
+   "file": "src/xrpld/app/misc/CanonicalTXSet.h",
+   "id": "E22",
+   "start_line": 30
+  },
+  {
+   "anchor": "lhs.seqProxy_ < rhs.seqProxy_",
+   "blob_sha": "41ee1988e1f9ddd3a46deb15f89a82c48c6a36f5",
+   "blob_size": 3159,
+   "end_line": 44,
+   "file": "src/xrpld/app/misc/CanonicalTXSet.cpp",
+   "id": "E23",
+   "start_line": 28
+  },
+  {
+   "anchor": "ret ^= salt_",
+   "blob_sha": "41ee1988e1f9ddd3a46deb15f89a82c48c6a36f5",
+   "blob_size": 3159,
+   "end_line": 56,
+   "file": "src/xrpld/app/misc/CanonicalTXSet.cpp",
+   "id": "E24",
+   "start_line": 46
+  },
+  {
+   "anchor": "Prioritize transactions with Sequences over transactions with",
+   "blob_sha": "41ee1988e1f9ddd3a46deb15f89a82c48c6a36f5",
+   "blob_size": 3159,
+   "end_line": 93,
+   "file": "src/xrpld/app/misc/CanonicalTXSet.cpp",
+   "id": "E25",
+   "start_line": 62
+  },
+  {
+   "anchor": "LEDGER_TOTAL_PASSES 3",
+   "blob_sha": "9383a5357593b179f4e799d2669dd5ffd07a7f32",
+   "blob_size": 8650,
+   "end_line": 46,
+   "file": "src/xrpld/app/ledger/OpenLedger.h",
+   "id": "E26",
+   "start_line": 38
+  },
+  {
+   "anchor": "check.txExists",
+   "blob_sha": "9383a5357593b179f4e799d2669dd5ffd07a7f32",
+   "blob_size": 8650,
+   "end_line": 270,
+   "file": "src/xrpld/app/ledger/OpenLedger.h",
+   "id": "E27",
+   "start_line": 215
+  },
+  {
+   "anchor": "isTefFailure",
+   "blob_sha": "64a080053fd8a06e288f60bc15815d3a666837cf",
+   "blob_size": 7010,
+   "end_line": 196,
+   "file": "src/xrpld/app/ledger/detail/OpenLedger.cpp",
+   "id": "E28",
+   "start_line": 174
+  },
+  {
+   "anchor": "retriesFirst",
+   "blob_sha": "64a080053fd8a06e288f60bc15815d3a666837cf",
+   "blob_size": 7010,
+   "end_line": 145,
+   "file": "src/xrpld/app/ledger/detail/OpenLedger.cpp",
+   "id": "E29",
+   "start_line": 80
+  },
+  {
+   "anchor": "signerCount * baseFee",
+   "blob_sha": "fb84c40ff2e300e756bee1b4e3d3b995c44d343d",
+   "blob_size": 46576,
+   "end_line": 348,
+   "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+   "id": "E30",
+   "start_line": 331
+  },
+  {
+   "anchor": "telINSUF_FEE_P",
+   "blob_sha": "fb84c40ff2e300e756bee1b4e3d3b995c44d343d",
+   "blob_size": 46576,
+   "end_line": 410,
+   "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+   "id": "E31",
+   "start_line": 380
+  },
+  {
+   "anchor": "has future sequence number",
+   "blob_sha": "fb84c40ff2e300e756bee1b4e3d3b995c44d343d",
+   "blob_size": 46576,
+   "end_line": 550,
+   "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+   "id": "E32",
+   "start_line": 480
+  },
+  {
+   "anchor": "tefMAX_LEDGER",
+   "blob_sha": "fb84c40ff2e300e756bee1b4e3d3b995c44d343d",
+   "blob_size": 46576,
+   "end_line": 580,
+   "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+   "id": "E33",
+   "start_line": 552
+  },
+  {
+   "anchor": "seqProx.value() + 1",
+   "blob_sha": "fb84c40ff2e300e756bee1b4e3d3b995c44d343d",
+   "blob_size": 46576,
+   "end_line": 600,
+   "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+   "id": "E34",
+   "start_line": 582
+  },
+  {
+   "anchor": "checkPriorTxAndLastLedger",
+   "blob_sha": "0413b4fb7ef4603f42c217b2590f1a582a7d7523",
+   "blob_size": 14678,
+   "end_line": 215,
+   "file": "src/xrpld/app/tx/detail/applySteps.cpp",
+   "id": "E35",
+   "start_line": 190
+  },
+  {
+   "anchor": "isBlocker_ = (category == blocker)",
+   "blob_sha": "0413b4fb7ef4603f42c217b2590f1a582a7d7523",
+   "blob_size": 14678,
+   "end_line": 300,
+   "file": "src/xrpld/app/tx/detail/applySteps.cpp",
+   "id": "E36",
+   "start_line": 290
+  },
+  {
+   "anchor": "minCONSENSUS_PCT = 67",
+   "blob_sha": "d565bd9a5228de171cc777a0a098592f9e8505df",
+   "blob_size": 8302,
+   "end_line": 82,
+   "file": "src/xrpld/consensus/ConsensusParms.h",
+   "id": "E37",
+   "start_line": 75
+  },
+  {
+   "anchor": "avalancheCutoffs",
+   "blob_sha": "d565bd9a5228de171cc777a0a098592f9e8505df",
+   "blob_size": 8302,
+   "end_line": 170,
+   "file": "src/xrpld/consensus/ConsensusParms.h",
+   "id": "E38",
+   "start_line": 140
+  },
+  {
+   "anchor": "minCONSENSUS_PCT",
+   "blob_sha": "19df205249720c26747d359ec6f9542395c2c038",
+   "blob_size": 11494,
+   "end_line": 135,
+   "file": "src/xrpld/consensus/DisputedTx.h",
+   "id": "E39",
+   "start_line": 88
+  },
+  {
+   "anchor": "weight = (yays_ * 100",
+   "blob_sha": "19df205249720c26747d359ec6f9542395c2c038",
+   "blob_size": 11494,
+   "end_line": 310,
+   "file": "src/xrpld/consensus/DisputedTx.h",
+   "id": "E40",
+   "start_line": 275
+  },
+  {
+   "anchor": "preferred ledger is found by walking",
+   "blob_sha": "17f9e570b0e80d13414bd0a0369e38124d432b0e",
+   "blob_size": 27368,
+   "end_line": 670,
+   "file": "src/xrpld/consensus/LedgerTrie.h",
+   "id": "E41",
+   "start_line": 625
+  },
+  {
+   "anchor": "more support amongst trusted validators",
+   "blob_sha": "c333aeaefd7890bf1c7d19e56eadbae0b788602e",
+   "blob_size": 39557,
+   "end_line": 870,
+   "file": "src/xrpld/consensus/Validations.h",
+   "id": "E42",
+   "start_line": 837
+  },
+  {
+   "anchor": "v.trusted() && v.full()",
+   "blob_sha": "c333aeaefd7890bf1c7d19e56eadbae0b788602e",
+   "blob_size": 39557,
+   "end_line": 1050,
+   "file": "src/xrpld/consensus/Validations.h",
+   "id": "E43",
+   "start_line": 1031
+  },
+  {
+   "anchor": "Use a 67% quorum",
+   "blob_sha": "861e2112c1f9355e03b9e42a7565cf6f37cf8c2e",
+   "blob_size": 72746,
+   "end_line": 1935,
+   "file": "src/xrpld/app/misc/detail/ValidatorList.cpp",
+   "id": "E44",
+   "start_line": 1898
+  },
+  {
+   "anchor": "valCount >= app_.validators().quorum()",
+   "blob_sha": "67826c253286c69622334382ac89db711c7a60d2",
+   "blob_size": 70382,
+   "end_line": 915,
+   "file": "src/xrpld/app/ledger/detail/LedgerMaster.cpp",
+   "id": "E45",
+   "start_line": 900
+  },
+  {
+   "anchor": "getNeededValidations",
+   "blob_sha": "67826c253286c69622334382ac89db711c7a60d2",
+   "blob_size": 70382,
+   "end_line": 960,
+   "file": "src/xrpld/app/ledger/detail/LedgerMaster.cpp",
+   "id": "E46",
+   "start_line": 950
+  },
+  {
+   "anchor": "unpredictable but deterministic order",
+   "blob_sha": "457555cc1c83cb617a6838e0099fc93e1d715b49",
+   "blob_size": 37567,
+   "end_line": 535,
+   "file": "src/xrpld/app/consensus/RCLConsensus.cpp",
+   "id": "E47",
+   "start_line": 515
+  },
+  {
+   "anchor": "Test applying disputed transaction",
+   "blob_sha": "457555cc1c83cb617a6838e0099fc93e1d715b49",
+   "blob_size": 37567,
+   "end_line": 660,
+   "file": "src/xrpld/app/consensus/RCLConsensus.cpp",
+   "id": "E48",
+   "start_line": 625
+  },
+  {
+   "anchor": "built->txExists(txid)",
+   "blob_sha": "4305426753b4702525d665ed766ea7d627633313",
+   "blob_size": 8343,
+   "end_line": 145,
+   "file": "src/xrpld/app/ledger/detail/BuildLedger.cpp",
+   "id": "E49",
+   "start_line": 100
+  },
+  {
+   "anchor": "LastLedgerSequence) + 1",
+   "blob_sha": "140bd32961acefec5a851bd9f0a2cfdab5c5a4f1",
+   "blob_size": 5809,
+   "end_line": 70,
+   "file": "src/xrpld/app/ledger/detail/LocalTxs.cpp",
+   "id": "E50",
+   "start_line": 55
+  },
+  {
+   "anchor": "holdLedgers = 5",
+   "blob_sha": "2d202a5b6027eae9d580909129dea9c6e6770812",
+   "blob_size": 2181,
+   "end_line": 45,
+   "file": "src/xrpld/app/ledger/LocalTxs.h",
+   "id": "E51",
+   "start_line": 35
+  },
+  {
+   "anchor": "lftNormalFee =",
+   "blob_sha": "0064359c762cf41f39b19d7840ad79809dd33369",
+   "blob_size": 4707,
+   "end_line": 150,
+   "file": "src/xrpld/app/misc/LoadFeeTrack.h",
+   "id": "E52",
+   "start_line": 140
+  },
+  {
+   "anchor": "lastLedgerMedianFeeLevel",
+   "blob_sha": "468ab2b52822b7c4bb552908c4a0eea4897f1695",
+   "blob_size": 19544,
+   "end_line": 70,
+   "file": "src/xrpld/app/misc/FeeEscalation.md",
+   "id": "E53",
+   "start_line": 50
+  },
+  {
+   "anchor": "25% higher fee",
+   "blob_sha": "468ab2b52822b7c4bb552908c4a0eea4897f1695",
+   "blob_size": 19544,
+   "end_line": 135,
+   "file": "src/xrpld/app/misc/FeeEscalation.md",
+   "id": "E54",
+   "start_line": 120
+  },
+  {
+   "anchor": "TicketBatch",
+   "blob_sha": "a88ebd1a492b9b5d658bde9c5f2835094536b244",
+   "blob_size": 10479,
+   "end_line": 106,
+   "file": "include/xrpl/protocol/detail/features.macro",
+   "id": "E55",
+   "start_line": 100
+  },
+  {
+   "anchor": "RETIRE(FeeEscalation)",
+   "blob_sha": "a88ebd1a492b9b5d658bde9c5f2835094536b244",
+   "blob_size": 10479,
+   "end_line": 152,
+   "file": "include/xrpl/protocol/detail/features.macro",
+   "id": "E56",
+   "start_line": 148
+  },
+  {
+   "anchor": "slightly less than 80%",
+   "blob_sha": "b13e40c3aed1ec8dbd9ec68a464caa5f512f113f",
+   "blob_size": 34890,
+   "end_line": 378,
+   "file": "src/xrpld/app/misc/detail/AmendmentTable.cpp",
+   "id": "E57",
+   "start_line": 360
+  },
+  {
+   "anchor": "Determine which transactions made it",
+   "blob_sha": "7cdf15949d400b8e0cff8078c2f884f9b0b39ed2",
+   "blob_size": 4711,
+   "end_line": 130,
+   "file": "src/xrpld/app/consensus/RCLCensorshipDetector.h",
+   "id": "E58",
+   "start_line": 99
+  },
+  {
+   "anchor": "shouldRelay",
+   "blob_sha": "60a0b01155707fde4cb3dd6696226117358d065f",
+   "blob_size": 8341,
+   "end_line": 275,
+   "file": "src/xrpld/app/misc/HashRouter.h",
+   "id": "E59",
+   "start_line": 260
+  },
+  {
+   "anchor": "processClosedLedger",
+   "blob_sha": "457555cc1c83cb617a6838e0099fc93e1d715b49",
+   "blob_size": 37567,
+   "end_line": 805,
+   "file": "src/xrpld/app/consensus/RCLConsensus.cpp",
+   "id": "E60",
+   "start_line": 770
+  },
+  {
+   "anchor": "censorshipWarnInternal = 15",
+   "blob_sha": "38481d236335b558a0c6f07a534f52e3a76248ec",
+   "blob_size": 18461,
+   "end_line": 56,
+   "file": "src/xrpld/app/consensus/RCLConsensus.h",
+   "id": "E61",
+   "start_line": 54
+  }
+ ],
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+ "repo": "postfiatd"
+}
