@@ -1,0 +1,41 @@
+# Source excerpt E02 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/TxQ.h, lines 78-110.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: e764bd3e2a63b404397dc2bc66642f283605e69290915a2f24e62c615a0d4fed
+# Source file git blob SHA: 6afd83b0d0885f25cdac7de475e9dd1ebc167ed3
+# Source file size: 32999 bytes
+
+# --- src/xrpld/app/misc/TxQ.h lines 78-110 ---
+
+            Can be overridden by @ref queueSizeMin
+        */
+        std::size_t ledgersInQueue = 20;
+        /** The smallest limit the queue is allowed.
+
+            Will allow more than `ledgersInQueue` in the queue
+            if ledgers are small.
+        */
+        std::size_t queueSizeMin = 2000;
+        /** Extra percentage required on the fee level of a queued
+            transaction to replace that transaction with another
+            with the same SeqProxy.
+
+            If queued transaction for account "Alice" with seq 45
+            has a fee level of 512, a replacement transaction for
+            "Alice" with seq 45 must have a fee level of at least
+            512 * (1 + 0.25) = 640 to be considered.
+        */
+        std::uint32_t retrySequencePercent = 25;
+        /// Minimum value of the escalation multiplier, regardless
+        /// of the prior ledger's median fee level.
+        FeeLevel64 minimumEscalationMultiplier = baseLevel * 500;
+        /// Minimum number of transactions to allow into the ledger
+        /// before escalation, regardless of the prior ledger's size.
+        std::uint32_t minimumTxnInLedger = 32;
+        /// Like @ref minimumTxnInLedger for standalone mode.
+        /// Primarily so that tests don't need to worry about queuing.
+        std::uint32_t minimumTxnInLedgerSA = 1000;
+        /// Number of transactions per ledger that fee escalation "works
+        /// towards".
+        std::uint32_t targetTxnInLedger = 256;
+        /** Optional maximum allowed value of transactions per ledger before

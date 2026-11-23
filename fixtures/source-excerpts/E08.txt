@@ -1,0 +1,91 @@
+# Source excerpt E08 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 88-170.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 88-170 ---
+    TxQ::Setup const& setup)
+{
+    std::vector<FeeLevel64> feeLevels;
+    auto const txBegin = view.txs.begin();
+    auto const txEnd = view.txs.end();
+    auto const size = std::distance(txBegin, txEnd);
+    feeLevels.reserve(size);
+    std::for_each(txBegin, txEnd, [&](auto const& tx) {
+        feeLevels.push_back(getFeeLevelPaid(view, *tx.first));
+    });
+    std::sort(feeLevels.begin(), feeLevels.end());
+    XRPL_ASSERT(
+        size == feeLevels.size(),
+        "ripple::TxQ::FeeMetrics::update : fee levels size");
+
+    JLOG((timeLeap ? j_.warn() : j_.debug()))
+        << "Ledger " << view.info().seq << " has " << size << " transactions. "
+        << "Ledgers are processing " << (timeLeap ? "slowly" : "as expected")
+        << ". Expected transactions is currently " << txnsExpected_
+        << " and multiplier is " << escalationMultiplier_;
+
+    if (timeLeap)
+    {
+        // Ledgers are taking to long to process,
+        // so clamp down on limits.
+        auto const cutPct = 100 - setup.slowConsensusDecreasePercent;
+        // upperLimit must be >= minimumTxnCount_ or std::clamp can give
+        // unexpected results
+        auto const upperLimit = std::max<std::uint64_t>(
+            mulDiv(txnsExpected_, cutPct, 100).value_or(ripple::muldiv_max),
+            minimumTxnCount_);
+        txnsExpected_ = std::clamp<std::uint64_t>(
+            mulDiv(size, cutPct, 100).value_or(ripple::muldiv_max),
+            minimumTxnCount_,
+            upperLimit);
+        recentTxnCounts_.clear();
+    }
+    else if (size > txnsExpected_ || size > targetTxnCount_)
+    {
+        recentTxnCounts_.push_back(
+            mulDiv(size, 100 + setup.normalConsensusIncreasePercent, 100)
+                .value_or(ripple::muldiv_max));
+        auto const iter =
+            std::max_element(recentTxnCounts_.begin(), recentTxnCounts_.end());
+        BOOST_ASSERT(iter != recentTxnCounts_.end());
+        auto const next = [&] {
+            // Grow quickly: If the max_element is >= the
+            // current size limit, use it.
+            if (*iter >= txnsExpected_)
+                return *iter;
+            // Shrink slowly: If the max_element is < the
+            // current size limit, use a limit that is
+            // 90% of the way from max_element to the
+            // current size limit.
+            return (txnsExpected_ * 9 + *iter) / 10;
+        }();
+        // Ledgers are processing in a timely manner,
+        // so keep the limit high, but don't let it
+        // grow without bound.
+        txnsExpected_ = std::min(next, maximumTxnCount_.value_or(next));
+    }
+
+    if (!size)
+    {
+        escalationMultiplier_ = setup.minimumEscalationMultiplier;
+    }
+    else
+    {
+        // In the case of an odd number of elements, this
+        // evaluates to the middle element; for an even
+        // number of elements, it will add the two elements
+        // on either side of the "middle" and average them.
+        escalationMultiplier_ =
+            (feeLevels[size / 2] + feeLevels[(size - 1) / 2] + FeeLevel64{1}) /
+            2;
+        escalationMultiplier_ =
+            std::max(escalationMultiplier_, setup.minimumEscalationMultiplier);
+    }
+    JLOG(j_.debug()) << "Expected transactions updated to " << txnsExpected_
+                     << " and multiplier updated to " << escalationMultiplier_;
+
+    return size;
+}

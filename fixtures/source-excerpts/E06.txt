@@ -1,0 +1,36 @@
+# Source excerpt E06 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 37-64.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 37-64 ---
+
+static FeeLevel64
+getFeeLevelPaid(ReadView const& view, STTx const& tx)
+{
+    auto const [baseFee, effectiveFeePaid] = [&view, &tx]() {
+        XRPAmount baseFee = calculateBaseFee(view, tx);
+        XRPAmount feePaid = tx[sfFee].xrp();
+
+        // If baseFee is 0 then the cost of a basic transaction is free, but we
+        // need the effective fee level to be non-zero.
+        XRPAmount const mod = [&view, &tx, baseFee]() {
+            if (baseFee.signum() > 0)
+                return XRPAmount{0};
+            auto def = calculateDefaultBaseFee(view, tx);
+            return def.signum() == 0 ? XRPAmount{1} : def;
+        }();
+        return std::pair{baseFee + mod, feePaid + mod};
+    }();
+
+    XRPL_ASSERT(baseFee.signum() > 0, "ripple::getFeeLevelPaid : positive fee");
+    if (effectiveFeePaid.signum() <= 0 || baseFee.signum() <= 0)
+    {
+        return FeeLevel64(0);
+    }
+
+    return mulDiv(effectiveFeePaid, TxQ::baseLevel, baseFee)
+        .value_or(FeeLevel64(std::numeric_limits<std::uint64_t>::max()));
+}

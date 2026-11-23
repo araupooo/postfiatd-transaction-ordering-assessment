@@ -1,0 +1,37 @@
+# Source excerpt E03 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/TxQ.h, lines 128-156.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: e764bd3e2a63b404397dc2bc66642f283605e69290915a2f24e62c615a0d4fed
+# Source file git blob SHA: 6afd83b0d0885f25cdac7de475e9dd1ebc167ed3
+# Source file size: 32999 bytes
+
+# --- src/xrpld/app/misc/TxQ.h lines 128-156 ---
+            Example: If the "expectation" is for 500 transactions, and a
+            ledger is validated normally with 501 transactions, then the
+            expected ledger size will be updated to 601.
+        */
+        std::uint32_t normalConsensusIncreasePercent = 20;
+        /** When consensus takes longer than appropriate, the expected
+            ledger size is updated to the lesser of the previous ledger
+            size and the current expected ledger size minus this
+            percentage.
+
+            Calculations are subject to configured limits.
+
+            Example: If the ledger has 15000 transactions, and it is
+            validated slowly, then the expected ledger size will be
+            updated to 7500. If there are only 6 transactions, the
+            expected ledger size will be updated to 5, assuming the
+            default minimum.
+        */
+        std::uint32_t slowConsensusDecreasePercent = 50;
+        /// Maximum number of transactions that can be queued by one account.
+        std::uint32_t maximumTxnPerAccount = 10;
+        /** Minimum difference between the current ledger sequence and a
+            transaction's `LastLedgerSequence` for the transaction to be
+            queueable. Decreases the chance a transaction will get queued
+            and broadcast only to expire before it gets a chance to be
+            processed.
+        */
+        std::uint32_t minimumLastLedgerBuffer = 2;
+        /// Use standalone mode behavior.

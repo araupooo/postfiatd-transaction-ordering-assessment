@@ -1,0 +1,15 @@
+# Source excerpt E01 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/TxQ.h, lines 60-66.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: e764bd3e2a63b404397dc2bc66642f283605e69290915a2f24e62c615a0d4fed
+# Source file git blob SHA: 6afd83b0d0885f25cdac7de475e9dd1ebc167ed3
+# Source file size: 32999 bytes
+
+# --- src/xrpld/app/misc/TxQ.h lines 60-66 ---
+class TxQ
+{
+public:
+    /// Fee level for single-signed reference transaction.
+    static constexpr FeeLevel64 baseLevel{256};
+
+    /**
