@@ -1,0 +1,26 @@
+# Source excerpt E15 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 1243-1260.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 1243-1260 ---
+    if (!replacedTxIter && isFull())
+    {
+        auto lastRIter = byFee_.rbegin();
+        while (lastRIter != byFee_.rend() && lastRIter->account == account)
+        {
+            ++lastRIter;
+        }
+        if (lastRIter == byFee_.rend())
+        {
+            // The only way this condition can happen is if the entire
+            // queue is filled with transactions from this account. This
+            // is impossible with default settings - minimum queue size
+            // is 2000, and an account can only have 10 transactions
+            // queued. However, it can occur if settings are changed,
+            // and there is unit test coverage.
+            JLOG(j_.info())
+                << "Queue is full, and transaction " << transactionID
+                << " would kick a transaction from the same account ("

@@ -1,0 +1,45 @@
+# Source excerpt E20 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 1679-1715.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 1679-1715 ---
+TxQ::tryDirectApply(
+    Application& app,
+    OpenView& view,
+    std::shared_ptr<STTx const> const& tx,
+    ApplyFlags flags,
+    beast::Journal j)
+{
+    auto const account = (*tx)[sfAccount];
+    auto const sleAccount = view.read(keylet::account(account));
+
+    // Don't attempt to direct apply if the account is not in the ledger.
+    if (!sleAccount)
+        return {};
+
+    SeqProxy const acctSeqProx = SeqProxy::sequence((*sleAccount)[sfSequence]);
+    SeqProxy const txSeqProx = tx->getSeqProxy();
+
+    // Can only directly apply if the transaction sequence matches the account
+    // sequence or if the transaction uses a ticket.
+    if (txSeqProx.isSeq() && txSeqProx != acctSeqProx)
+        return {};
+
+    FeeLevel64 const requiredFeeLevel = [this, &view, flags]() {
+        std::lock_guard lock(mutex_);
+        return getRequiredFeeLevel(
+            view, flags, feeMetrics_.getSnapshot(), lock);
+    }();
+
+    // If the transaction's fee is high enough we may be able to put the
+    // transaction straight into the ledger.
+    FeeLevel64 const feeLevelPaid = getFeeLevelPaid(view, *tx);
+
+    if (feeLevelPaid >= requiredFeeLevel)
+    {
+        // Attempt to apply the transaction directly.
+        auto const transactionID = tx->getTransactionID();
+        JLOG(j_.trace()) << "Applying transaction " << transactionID

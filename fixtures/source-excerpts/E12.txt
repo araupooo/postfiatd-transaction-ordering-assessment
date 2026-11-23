@@ -1,0 +1,35 @@
+# Source excerpt E12 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 384-410.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 384-410 ---
+TxQ::canBeHeld(
+    STTx const& tx,
+    ApplyFlags const flags,
+    OpenView const& view,
+    std::shared_ptr<SLE const> const& sleAccount,
+    AccountMap::iterator const& accountIter,
+    std::optional<TxQAccount::TxMap::iterator> const& replacementIter,
+    std::lock_guard<std::mutex> const& lock)
+{
+    // PreviousTxnID is deprecated and should never be used.
+    // AccountTxnID is not supported by the transaction
+    // queue yet, but should be added in the future.
+    // tapFAIL_HARD transactions are never held
+    if (tx.isFieldPresent(sfPreviousTxnID) ||
+        tx.isFieldPresent(sfAccountTxnID) || (flags & tapFAIL_HARD))
+        return telCAN_NOT_QUEUE;
+
+    {
+        // To be queued and relayed, the transaction needs to
+        // promise to stick around for long enough that it has
+        // a realistic chance of getting into a ledger.
+        auto const lastValid = getLastLedgerSequence(tx);
+        if (lastValid &&
+            *lastValid < view.info().seq + setup_.minimumLastLedgerBuffer)
+            return telCAN_NOT_QUEUE;
+    }
+

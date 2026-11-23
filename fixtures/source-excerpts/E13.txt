@@ -1,0 +1,49 @@
+# Source excerpt E13 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 411-451.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 411-451 ---
+    // Allow if the account is not in the queue at all.
+    if (accountIter == byAccount_.end())
+        return tesSUCCESS;
+
+    // Allow this tx to replace another one.
+    if (replacementIter)
+        return tesSUCCESS;
+
+    // Allow if there are fewer than the limit.
+    TxQAccount const& txQAcct = accountIter->second;
+    if (txQAcct.getTxnCount() < setup_.maximumTxnPerAccount)
+        return tesSUCCESS;
+
+    // If we get here the queue limit is exceeded.  Only allow if this
+    // transaction fills the _first_ sequence hole for the account.
+    auto const txSeqProx = tx.getSeqProxy();
+    if (txSeqProx.isTicket())
+        // Tickets always follow sequence-based transactions, so a ticket
+        // cannot unblock a sequence-based transaction.
+        return telCAN_NOT_QUEUE_FULL;
+
+    // This is the next queuable sequence-based SeqProxy for the account.
+    SeqProxy const nextQueuable = nextQueuableSeqImpl(sleAccount, lock);
+    if (txSeqProx != nextQueuable)
+        // The provided transaction does not fill the next open sequence gap.
+        return telCAN_NOT_QUEUE_FULL;
+
+    // Make sure they are not just topping off the account's queued
+    // sequence-based transactions.
+    if (auto const nextTxIter = txQAcct.transactions.upper_bound(nextQueuable);
+        nextTxIter != txQAcct.transactions.end() && nextTxIter->first.isSeq())
+        // There is a next transaction and it is sequence based.  They are
+        // filling a real gap.  Allow it.
+        return tesSUCCESS;
+
+    return telCAN_NOT_QUEUE_FULL;
+}
+
+auto
+TxQ::erase(TxQ::FeeMultiSet::const_iterator_type candidateIter)
+    -> FeeMultiSet::iterator_type

@@ -1,0 +1,48 @@
+# Source excerpt E16 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 1366-1405.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 1366-1405 ---
+TxQ::processClosedLedger(Application& app, ReadView const& view, bool timeLeap)
+{
+    std::lock_guard lock(mutex_);
+
+    feeMetrics_.update(app, view, timeLeap, setup_);
+    auto const& snapshot = feeMetrics_.getSnapshot();
+
+    auto ledgerSeq = view.info().seq;
+
+    if (!timeLeap)
+        maxSize_ = std::max(
+            snapshot.txnsExpected * setup_.ledgersInQueue, setup_.queueSizeMin);
+
+    // Remove any queued candidates whose LastLedgerSequence has gone by.
+    for (auto candidateIter = byFee_.begin(); candidateIter != byFee_.end();)
+    {
+        if (candidateIter->lastValid && *candidateIter->lastValid <= ledgerSeq)
+        {
+            byAccount_.at(candidateIter->account).dropPenalty = true;
+            candidateIter = erase(candidateIter);
+        }
+        else
+        {
+            ++candidateIter;
+        }
+    }
+
+    // Remove any TxQAccounts that don't have candidates
+    // under them
+    for (auto txQAccountIter = byAccount_.begin();
+         txQAccountIter != byAccount_.end();)
+    {
+        if (txQAccountIter->second.empty())
+            txQAccountIter = byAccount_.erase(txQAccountIter);
+        else
+            ++txQAccountIter;
+    }
+}
+
+/*

@@ -1,0 +1,64 @@
+# Source excerpt E14 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 860-915.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 860-915 ---
+    auto replacedTxIter = [accountIsInQueue, &accountIter, txSeqProx]()
+        -> std::optional<TxQAccount::TxMap::iterator> {
+        if (accountIsInQueue)
+        {
+            TxQAccount& txQAcct = accountIter->second;
+            if (auto const existingIter = txQAcct.transactions.find(txSeqProx);
+                existingIter != txQAcct.transactions.end())
+                return existingIter;
+        }
+        return {};
+    }();
+
+    // We may need the base fee for multiple transactions or transaction
+    // replacement, so just pull it up now.
+    auto const metricsSnapshot = feeMetrics_.getSnapshot();
+    auto const feeLevelPaid = getFeeLevelPaid(view, *tx);
+    auto const requiredFeeLevel =
+        getRequiredFeeLevel(view, flags, metricsSnapshot, lock);
+
+    // Is there a blocker already in the account's queue?  If so, don't
+    // allow additional transactions in the queue.
+    if (acctTxCount > 0)
+    {
+        // Allow tx to replace a blocker.  Otherwise, if there's a
+        // blocker, we can't queue tx.
+        //
+        // We only need to check if txIter->first is a blocker because we
+        // require that a blocker be alone in the account's queue.
+        if (acctTxCount == 1 &&
+            txIter->first->second.consequences().isBlocker() &&
+            (txIter->first->first != txSeqProx))
+        {
+            return {telCAN_NOT_QUEUE_BLOCKED, false};
+        }
+
+        // Is there a transaction for the same account with the same
+        // SeqProxy already in the queue?  If so we may replace the
+        // existing entry with this new transaction.
+        if (replacedTxIter)
+        {
+            // We are attempting to replace a transaction in the queue.
+            //
+            // Is the current transaction's fee higher than
+            // the queued transaction's fee + a percentage
+            TxQAccount::TxMap::iterator const& existingIter = *replacedTxIter;
+            auto requiredRetryLevel = increase(
+                existingIter->second.feeLevel, setup_.retrySequencePercent);
+            JLOG(j_.trace())
+                << "Found transaction in queue for account " << account
+                << " with " << txSeqProx << " new txn fee level is "
+                << feeLevelPaid << ", old txn fee level is "
+                << existingIter->second.feeLevel
+                << ", new txn needs fee level of " << requiredRetryLevel;
+            if (feeLevelPaid > requiredRetryLevel)
+            {
+                // Continue, leaving the queued transaction marked for removal.

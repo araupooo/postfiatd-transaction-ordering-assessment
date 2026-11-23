@@ -1,0 +1,89 @@
+# Source excerpt E18 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 1485-1565.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 1485-1565 ---
+                    << "Queued transaction " << candidateIter->txID
+                    << " applied successfully with " << transToken(txnResult)
+                    << ". Remove from queue.";
+
+                candidateIter = eraseAndAdvance(candidateIter);
+                ledgerChanged = true;
+            }
+            else if (
+                isTefFailure(txnResult) || isTemMalformed(txnResult) ||
+                candidateIter->retriesRemaining <= 0)
+            {
+                if (candidateIter->retriesRemaining <= 0)
+                    account.retryPenalty = true;
+                else
+                    account.dropPenalty = true;
+                JLOG(j_.debug()) << "Queued transaction " << candidateIter->txID
+                                 << " failed with " << transToken(txnResult)
+                                 << ". Remove from queue.";
+                candidateIter = eraseAndAdvance(candidateIter);
+            }
+            else
+            {
+                JLOG(j_.debug()) << "Queued transaction " << candidateIter->txID
+                                 << " failed with " << transToken(txnResult)
+                                 << ". Leave in queue."
+                                 << " Applied: " << didApply
+                                 << ". Flags: " << candidateIter->flags;
+                if (account.retryPenalty && candidateIter->retriesRemaining > 2)
+                    candidateIter->retriesRemaining = 1;
+                else
+                    --candidateIter->retriesRemaining;
+                candidateIter->lastResult = txnResult;
+                if (account.dropPenalty && account.transactions.size() > 1 &&
+                    isFull<95>())
+                {
+                    // The queue is close to full, this account has multiple
+                    // txs queued, and this account has had a transaction
+                    // fail.
+                    if (candidateIter->seqProxy.isTicket())
+                    {
+                        // Since the failed transaction has a ticket, order
+                        // doesn't matter.  Drop this one.
+                        JLOG(j_.info())
+                            << "Queue is nearly full, and transaction "
+                            << candidateIter->txID << " failed with "
+                            << transToken(txnResult)
+                            << ". Removing ticketed tx from account "
+                            << account.account;
+                        candidateIter = eraseAndAdvance(candidateIter);
+                    }
+                    else
+                    {
+                        // Even though we're giving this transaction another
+                        // chance, chances are it won't recover. To avoid
+                        // making things worse, drop the _last_ transaction for
+                        // this account.
+                        auto dropRIter = account.transactions.rbegin();
+                        XRPL_ASSERT(
+                            dropRIter->second.account == candidateIter->account,
+                            "ripple::TxQ::accept : account check");
+
+                        JLOG(j_.info())
+                            << "Queue is nearly full, and transaction "
+                            << candidateIter->txID << " failed with "
+                            << transToken(txnResult)
+                            << ". Removing last item from account "
+                            << account.account;
+                        auto endIter = byFee_.iterator_to(dropRIter->second);
+                        if (endIter != candidateIter)
+                            erase(endIter);
+                        ++candidateIter;
+                    }
+                }
+                else
+                    ++candidateIter;
+            }
+        }
+        else
+        {
+            break;
+        }

@@ -1,0 +1,50 @@
+# Source excerpt E10 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 234-275.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 234-275 ---
+TxQ::FeeMetrics::escalatedSeriesFeeLevel(
+    Snapshot const& snapshot,
+    OpenView const& view,
+    std::size_t extraCount,
+    std::size_t seriesSize)
+{
+    /* Transactions in the open ledger so far.
+        AKA Transactions that will be in the open ledger when
+        the first tx in the series is attempted.
+    */
+    auto const current = view.txCount() + extraCount;
+    /* Transactions that will be in the open ledger when
+        the last tx in the series is attempted.
+    */
+    auto const last = current + seriesSize - 1;
+
+    auto const target = snapshot.txnsExpected;
+    auto const multiplier = snapshot.escalationMultiplier;
+
+    XRPL_ASSERT(
+        current > target,
+        "ripple::TxQ::FeeMetrics::escalatedSeriesFeeLevel : current over "
+        "target");
+
+    /* Calculate (apologies for the terrible notation)
+        sum(n = current -> last) : multiplier * n * n / (target * target)
+        multiplier / (target * target) * (sum(n = current -> last) : n * n)
+        multiplier / (target * target) * ((sum(n = 1 -> last) : n * n) -
+            (sum(n = 1 -> current - 1) : n * n))
+    */
+    auto const sumNlast = detail::sumOfFirstSquares(last);
+    auto const sumNcurrent = detail::sumOfFirstSquares(current - 1);
+    // because `last` is bigger, if either sum overflowed, then
+    // `sumNlast` definitely overflowed. Also the odds of this
+    // are nearly nil.
+    if (!sumNlast.first)
+        return {sumNlast.first, FeeLevel64{sumNlast.second}};
+    auto const totalFeeLevel = mulDiv(
+        multiplier, sumNlast.second - sumNcurrent.second, target * target);
+
+    return {totalFeeLevel.has_value(), *totalFeeLevel};
+}

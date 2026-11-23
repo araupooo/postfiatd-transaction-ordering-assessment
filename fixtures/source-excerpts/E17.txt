@@ -1,0 +1,34 @@
+# Source excerpt E17 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 1455-1480.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 1455-1480 ---
+        {
+            // There is a sequence transaction at the front of the queue and
+            // candidate has a later sequence, so skip this candidate.  We
+            // need to process sequence-based transactions in sequence order.
+            JLOG(j_.trace())
+                << "Skipping queued transaction " << candidateIter->txID
+                << " from account " << candidateIter->account
+                << " as it is not the first.";
+            candidateIter++;
+            continue;
+        }
+        auto const requiredFeeLevel =
+            getRequiredFeeLevel(view, tapNONE, metricsSnapshot, lock);
+        auto const feeLevelPaid = candidateIter->feeLevel;
+        JLOG(j_.trace()) << "Queued transaction " << candidateIter->txID
+                         << " from account " << candidateIter->account
+                         << " has fee level of " << feeLevelPaid
+                         << " needs at least " << requiredFeeLevel;
+        if (feeLevelPaid >= requiredFeeLevel)
+        {
+            JLOG(j_.trace()) << "Applying queued transaction "
+                             << candidateIter->txID << " to open ledger.";
+
+            auto const [txnResult, didApply, _metadata] =
+                candidateIter->apply(app, view, j_);
+
